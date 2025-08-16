@@ -1,6 +1,9 @@
 // API Service for BSLEU Exam Booking Platform
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+  (import.meta.env.MODE === 'production' 
+    ? 'https://your-backend-domain.com/api'  // Replace with your actual backend URL
+    : 'http://localhost:5000/api');
 
 // Types
 export interface User {
