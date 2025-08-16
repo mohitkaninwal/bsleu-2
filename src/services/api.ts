@@ -2,7 +2,7 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
   (import.meta.env.MODE === 'production' 
-    ? 'https://your-backend-domain.com/api'  // Replace with your actual backend URL
+    ? '/api'  // Same domain as frontend when deployed on Vercel
     : 'http://localhost:5000/api');
 
 // Types
