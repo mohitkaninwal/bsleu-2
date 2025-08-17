@@ -7,14 +7,27 @@ import logger from '../utils/logger.js';
 import { sendPaymentReceipt, sendBookingConfirmation } from '../services/emailService.js';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+// Initialize Razorpay only if keys are provided
+let razorpay = null;
+if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+    razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
+    logger.info('Razorpay initialized with provided credentials');
+} else {
+    logger.warn('Razorpay credentials not provided - payment features will be disabled');
+}
 
 // @desc    Create a Razorpay order
 export const createOrder = async (req, res) => {
     try {
+        if (!razorpay) {
+            return res.status(503).json({
+                success: false,
+                message: 'Payment service not configured'
+            });
+        }
         const { bookingId } = req.body;
         const userId = req.user.id;
 
@@ -88,6 +101,12 @@ export const createOrder = async (req, res) => {
 // @desc    Verify a Razorpay payment
 export const verifyPayment = async (req, res) => {
     try {
+        if (!razorpay) {
+            return res.status(503).json({
+                success: false,
+                message: 'Payment service not configured'
+            });
+        }
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, bookingId } = req.body;
         const userId = req.user.id;
 
