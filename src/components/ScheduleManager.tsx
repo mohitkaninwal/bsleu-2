@@ -302,7 +302,8 @@ export const ScheduleManager = ({ onScheduleUpdate }: ScheduleManagerProps) => {
             </Button>
           </div>
         </DialogContent>
-      </Dialog>
+        </Dialog>
+      </div>
 
       {/* Existing Schedules */}
       <div className="space-y-4">

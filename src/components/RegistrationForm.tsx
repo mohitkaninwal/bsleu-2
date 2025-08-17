@@ -216,14 +216,11 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
         }
       });
 
-      // Require both front and back images of the identification document
-      if (!formData.passportFront) {
-        newErrors.passportFront = 'Please upload the front side of your ID document';
-        isValid = false;
-      }
-      if (!formData.passportBack) {
-        newErrors.passportBack = 'Please upload the back side of your ID document';
-        isValid = false;
+      // Make document uploads optional but recommended
+      // Files are not persisted in localStorage for security, so we can't require them after refresh
+      if (!formData.passportFront && !formData.passportBack) {
+        // Show warning but don't block submission - this is just informational
+        console.log('No documents uploaded - proceeding with registration');
       }
     }
 
@@ -673,7 +670,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div>
-            <Label>ID Document - Front *</Label>
+            <Label>ID Document - Front (Recommended)</Label>
             <div className="mt-1">
               <DocumentUpload
                 onUpload={(file) => handleFieldChange('passportFront', file)}
@@ -690,7 +687,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
             )}
           </div>
           <div>
-            <Label>ID Document - Back *</Label>
+            <Label>ID Document - Back (Recommended)</Label>
             <div className="mt-1">
               <DocumentUpload
                 onUpload={(file) => handleFieldChange('passportBack', file)}
