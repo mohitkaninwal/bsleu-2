@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { authAPI, documentAPI, type RegistrationData } from "@/services/api";
+import { useFormPersistence } from "@/hooks/use-form-persistence";
 
 interface RegistrationFormProps {
   onBack: () => void;
@@ -27,10 +28,11 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  // Removed manual date input; use only calendar picker for DOB
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
-  const [formData, setFormData] = useState({
+  // Use form persistence hook to auto-save and restore form data
+  const initialFormData = {
     familyName: "",
     firstName: "",
     email: "",
@@ -49,11 +51,22 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
     examType: "",
     examLevel: "",
     partialComponent: "", // For partial exams: "written" or "oral"
-    // Document uploads
+    // Document uploads - files are not persisted for security reasons
     passportFront: null as File | null,
     passportBack: null as File | null,
     passportPhoto: null as File | null,
     telcCertificate: null as File | null, // Required for partial exams
+  };
+
+  const {
+    formData,
+    updateField,
+    clearFormData,
+    isDataLoaded
+  } = useFormPersistence({
+    key: 'registration',
+    initialData: initialFormData,
+    clearOnSubmit: true
   });
 
   // Country selection simplified to text inputs
@@ -161,7 +174,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
   // Removed manual date parsing and input change; only calendar selection is supported now
 
   const handleFieldChange = (fieldName: string, value: string | Date | File | null | undefined) => {
-    setFormData({ ...formData, [fieldName]: value });
+    updateField(fieldName, value);
     
     // Date is selected only via calendar now; no manual input syncing needed
     
@@ -241,6 +254,14 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
         return;
       }
 
+      setIsSubmitting(true);
+
+      // Show initial progress
+      toast({
+        title: "Submitting Registration...",
+        description: "Please wait while we process your information.",
+      });
+
       // Prepare registration data
       const registrationData: RegistrationData = {
         familyName: formData.familyName,
@@ -267,18 +288,45 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
       const result = await authAPI.register(registrationData);
 
       if (result.success) {
-        // Upload documents if they exist
-        if (formData.passportFront) {
-          await documentAPI.uploadDocument(formData.passportFront, 'passport_front');
-        }
-        if (formData.passportBack) {
-          await documentAPI.uploadDocument(formData.passportBack, 'passport_back');
-        }
-        if (formData.passportPhoto) {
-          await documentAPI.uploadDocument(formData.passportPhoto, 'passport_photo');
-        }
-        if (formData.telcCertificate) {
-          await documentAPI.uploadDocument(formData.telcCertificate, 'telc_certificate');
+        // Show document upload progress
+        const documentsToUpload = [
+          { file: formData.passportFront, type: 'passport_front' as const, name: 'ID Front' },
+          { file: formData.passportBack, type: 'passport_back' as const, name: 'ID Back' },
+          { file: formData.passportPhoto, type: 'passport_photo' as const, name: 'Photo' },
+          { file: formData.telcCertificate, type: 'telc_certificate' as const, name: 'Certificate' }
+        ].filter(doc => doc.file);
+
+        if (documentsToUpload.length > 0) {
+          toast({
+            title: "Uploading Documents...",
+            description: `Uploading ${documentsToUpload.length} document(s). Please wait...`,
+          });
+
+          // Upload documents in parallel for better performance
+          const uploadPromises = documentsToUpload.map(async (doc) => {
+            try {
+              await documentAPI.uploadDocument(doc.file!, doc.type);
+              return { success: true, name: doc.name };
+            } catch (error) {
+              console.error(`Failed to upload ${doc.name}:`, error);
+              return { success: false, name: doc.name, error };
+            }
+          });
+
+          const uploadResults = await Promise.allSettled(uploadPromises);
+          const failedUploads = uploadResults
+            .map((result, index) => ({ result, doc: documentsToUpload[index] }))
+            .filter(({ result }) => result.status === 'rejected' || 
+              (result.status === 'fulfilled' && !result.value.success))
+            .map(({ doc }) => doc.name);
+
+          if (failedUploads.length > 0) {
+            toast({
+              title: "Some Documents Failed to Upload",
+              description: `Failed: ${failedUploads.join(', ')}. You can upload them later.`,
+              variant: "destructive"
+            });
+          }
         }
 
         toast({
@@ -286,11 +334,18 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
           description: "Your account has been created. Proceeding to booking system...",
         });
 
-        onNext();
+        // Clear form data after successful registration
+        clearFormData();
+        
+        // Small delay to ensure user sees success message
+        setTimeout(() => {
+          onNext();
+        }, 1000);
+
       } else {
         toast({
           title: "Registration Failed",
-          description: result.message || "Please try again.",
+          description: result.message || "Please check your information and try again.",
           variant: "destructive"
         });
       }
@@ -298,15 +353,17 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
       console.error('Registration error:', error);
       toast({
         title: "Registration Error",
-        description: "An error occurred during registration. Please try again.",
+        description: "Network error. Please check your connection and try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const renderStep1 = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div>
           <Label htmlFor="familyName">Family Name *</Label>
           <Input
@@ -377,49 +434,67 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div>
           <Label>Date of Birth *</Label>
           <div className="space-y-2">
-            <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal bg-white hover:bg-gray-50 border-2",
-                    !formData.dateOfBirth && "text-muted-foreground",
-                    errors.dateOfBirth && "border-red-500"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formData.dateOfBirth ? (
-                    format(formData.dateOfBirth, "dd MMMM yyyy")
-                  ) : (
-                    <span>Select date of birth</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-white shadow-lg border" align="start">
-                <Calendar
-                  mode="single"
-                  selected={formData.dateOfBirth}
-                  onSelect={(date) => {
-                    handleFieldChange('dateOfBirth', date);
-                    // Auto-close the popover after selection
-                    if (date) {
-                      setIsDatePickerOpen(false);
-                    }
-                  }}
-                  disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                  captionLayout="dropdown-buttons"
-                  fromYear={1900}
-                  toYear={new Date().getFullYear()}
-                  defaultMonth={formData.dateOfBirth || new Date(1990, 0)}
-                  showOutsideDays={false}
-                  fixedWeeks
-                />
-              </PopoverContent>
-            </Popover>
+            {/* Mobile-first approach: Show native date input on mobile, custom picker on desktop */}
+            <div className="block sm:hidden">
+              <Input
+                type="date"
+                id="dateOfBirth-mobile"
+                value={formData.dateOfBirth ? format(formData.dateOfBirth, 'yyyy-MM-dd') : ''}
+                onChange={(e) => {
+                  const dateValue = e.target.value ? new Date(e.target.value + 'T00:00:00') : undefined;
+                  handleFieldChange('dateOfBirth', dateValue);
+                }}
+                max={format(new Date(), 'yyyy-MM-dd')}
+                min="1900-01-01"
+                className={cn("w-full", errors.dateOfBirth && "border-red-500")}
+                placeholder="Select date of birth"
+              />
+            </div>
+            <div className="hidden sm:block">
+              <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal bg-white hover:bg-gray-50 border-2",
+                      !formData.dateOfBirth && "text-muted-foreground",
+                      errors.dateOfBirth && "border-red-500"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.dateOfBirth ? (
+                      format(formData.dateOfBirth, "dd MMMM yyyy")
+                    ) : (
+                      <span>Select date of birth</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 bg-white shadow-lg border" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.dateOfBirth}
+                    onSelect={(date) => {
+                      handleFieldChange('dateOfBirth', date);
+                      // Auto-close the popover after selection
+                      if (date) {
+                        setIsDatePickerOpen(false);
+                      }
+                    }}
+                    disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                    captionLayout="dropdown-buttons"
+                    fromYear={1900}
+                    toYear={new Date().getFullYear()}
+                    defaultMonth={formData.dateOfBirth || new Date(1990, 0)}
+                    showOutsideDays={false}
+                    fixedWeeks
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
           {errors.dateOfBirth && (
             <div className="flex items-center text-red-500 text-sm mt-1">
@@ -449,7 +524,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div>
           <Label htmlFor="countryOfBirth">Country of Birth *</Label>
           <Input
@@ -488,7 +563,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
 
   const renderStep2 = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div>
           <Label>Native Language *</Label>
           <Select value={formData.nativeLanguage} onValueChange={(value) => handleFieldChange('nativeLanguage', value)}>
@@ -596,7 +671,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div>
             <Label>ID Document - Front *</Label>
             <div className="mt-1">
@@ -637,57 +712,62 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-8">
-      <div className="container mx-auto px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="mb-8">
-            <Button variant="ghost" onClick={onBack} className="mb-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-4 sm:py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-6 sm:mb-8">
+            <Button variant="ghost" onClick={onBack} className="mb-4 text-sm sm:text-base">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Home
+              <span className="hidden sm:inline">Back to Home</span>
+              <span className="sm:hidden">Back</span>
             </Button>
-            <h1 className="text-3xl font-bold text-gray-900">Registration</h1>
-            <p className="text-gray-600 mt-2">Complete your registration to book an examination</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Registration</h1>
+            <p className="text-gray-600 mt-2 text-sm sm:text-base">Complete your registration to book an examination</p>
           </div>
 
           {/* Progress Bar */}
-          <div className="mb-8">
+          <div className="mb-6 sm:mb-8">
             <div className="flex items-center">
               <div className={`flex items-center ${step >= 1 ? 'text-blue-600' : 'text-gray-400'}`}>
-                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${step >= 1 ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'}`}>
+                <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center text-xs sm:text-base ${step >= 1 ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'}`}>
                   1
                 </div>
-                <span className="ml-2 font-medium">Personal Info</span>
+                <span className="ml-2 font-medium text-sm sm:text-base">
+                  <span className="hidden sm:inline">Personal Info</span>
+                  <span className="sm:hidden">Personal</span>
+                </span>
               </div>
-              <div className={`flex-1 h-1 mx-4 ${step >= 2 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
+              <div className={`flex-1 h-1 mx-2 sm:mx-4 ${step >= 2 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
               <div className={`flex items-center ${step >= 2 ? 'text-blue-600' : 'text-gray-400'}`}>
-                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${step >= 2 ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'}`}>
+                <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center text-xs sm:text-base ${step >= 2 ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'}`}>
                   2
                 </div>
-                <span className="ml-2 font-medium">Documents</span>
+                <span className="ml-2 font-medium text-sm sm:text-base">Documents</span>
               </div>
             </div>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>
+          <Card className="shadow-lg">
+            <CardHeader className="pb-4 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl lg:text-2xl">
                 {step === 1 ? "Personal Information" : "Additional Details & Verification"}
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-sm sm:text-base">
                 {step === 1 
                   ? "Please provide your personal details accurately as they will appear on your certificate"
                   : "Complete your profile and upload required identification documents"
                 }
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               {step === 1 ? renderStep1() : renderStep2()}
               
-              <div className="flex justify-between mt-8">
+              <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 sm:mt-8">
                 {step > 1 && (
-                  <Button variant="outline" onClick={() => setStep(step - 1)}>
+                  <Button variant="outline" onClick={() => setStep(step - 1)} className="order-2 sm:order-1">
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Previous
+                    <span className="hidden sm:inline">Previous</span>
+                    <span className="sm:hidden">Back</span>
                   </Button>
                 )}
                 {step < 2 ? (
@@ -697,18 +777,31 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
                         setStep(step + 1);
                       }
                     }} 
-                    className="ml-auto"
+                    className="ml-auto order-1 sm:order-2"
                   >
-                    Next
+                    <span className="hidden sm:inline">Next</span>
+                    <span className="sm:hidden">Continue</span>
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 ) : (
                   <Button 
                     onClick={handleRegistrationSubmit}
-                    className="ml-auto"
+                    className="ml-auto order-1 sm:order-2"
+                    disabled={isSubmitting}
                   >
-                    Complete Registration
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        <span className="hidden sm:inline">Processing...</span>
+                        <span className="sm:hidden">Wait...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="hidden sm:inline">Complete Registration</span>
+                        <span className="sm:hidden">Complete</span>
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </>
+                    )}
                   </Button>
                 )}
               </div>

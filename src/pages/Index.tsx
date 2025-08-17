@@ -56,19 +56,23 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-3">
+      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <img
                 src="/logo.png"
                 alt="BSL Akademie logo"
-                className="h-10 sm:h-14 w-auto transform origin-left scale-125 sm:scale-150"
+                className="h-8 sm:h-10 md:h-12 lg:h-14 w-auto"
               />
             </div>
-            <div className="flex items-center space-x-4">
-              <Button onClick={() => setCurrentView("register")}>
-                Book Exam
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <Button 
+                onClick={() => setCurrentView("register")}
+                className="text-sm sm:text-base px-3 sm:px-4 py-2"
+              >
+                <span className="hidden sm:inline">Book Exam</span>
+                <span className="sm:hidden">Book</span>
               </Button>
             </div>
           </div>
@@ -76,26 +80,35 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 px-4">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto text-center">
-          <div className="max-w-3xl mx-auto">
-            <Badge className="mb-4 bg-blue-100 text-blue-800 hover:bg-blue-100">
+          <div className="max-w-4xl mx-auto">
+            <Badge className="mb-4 sm:mb-6 bg-blue-100 text-blue-800 hover:bg-blue-100 text-xs sm:text-sm">
               Professional Language Certification
             </Badge>
-            <h2 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
               Master Your Language Skills with
-              <span className="text-blue-600"> BSLEU Certification</span>
+              <span className="text-blue-600 block sm:inline"> BSLEU Certification</span>
             </h2>
-            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-600 mb-6 sm:mb-8 leading-relaxed max-w-3xl mx-auto">
               Join thousands of students who have advanced their careers with our internationally recognized language proficiency examinations. Book your exam today and take the next step in your professional journey.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700" onClick={() => setCurrentView("register")}>
-                <Calendar className="mr-2 h-5 w-5" />
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center max-w-md sm:max-w-none mx-auto">
+              <Button 
+                size="lg" 
+                className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4" 
+                onClick={() => setCurrentView("register")}
+              >
+                <Calendar className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 Book Your Exam
               </Button>
-              <Button size="lg" variant="outline" onClick={handleViewExamsClick}>
-                <FileText className="mr-2 h-5 w-5" />
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4"
+                onClick={handleViewExamsClick}
+              >
+                <FileText className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 View Exams
               </Button>
             </div>
@@ -104,37 +117,36 @@ const Index = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">15,000+</div>
-              <div className="text-gray-600">Students Certified</div>
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
+            <div className="text-center p-4 sm:p-6 rounded-lg hover:bg-gray-50 transition-colors">
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-600 mb-2">15,000+</div>
+              <div className="text-sm sm:text-base text-gray-600">Students Certified</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">98%</div>
-              <div className="text-gray-600">Success Rate</div>
+            <div className="text-center p-4 sm:p-6 rounded-lg hover:bg-gray-50 transition-colors">
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-600 mb-2">98%</div>
+              <div className="text-sm sm:text-base text-gray-600">Success Rate</div>
             </div>
-            {/* Removed Test Centers stat per single-center model */}
-            <div className="text-center">
-              <div className="text-3xl font-bold text-orange-600 mb-2">24/7</div>
-              <div className="text-gray-600">Support Available</div>
+            <div className="text-center p-4 sm:p-6 rounded-lg hover:bg-gray-50 transition-colors">
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-orange-600 mb-2">24/7</div>
+              <div className="text-sm sm:text-base text-gray-600">Support Available</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Exam Levels */}
-      <section ref={examLevelsSectionRef} className="py-20 px-4">
+      <section ref={examLevelsSectionRef} className="py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Proficiency Level</h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">Choose Your Proficiency Level</h3>
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-4">
               Our comprehensive examination system covers all proficiency levels from beginner to expert. 
               Select the level that matches your current skills and career goals.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {examLevels.map((exam) => (
               <ExamLevelCard key={exam.level} {...exam} />
             ))}
@@ -143,21 +155,21 @@ const Index = () => {
       </section>
 
       {/* Features */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">Why Choose BSLEU?</h3>
-            <p className="text-lg text-gray-600">Experience the benefits of our modern examination platform</p>
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-gray-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">Why Choose BSLEU?</h3>
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">Experience the benefits of our modern examination platform</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <feature.icon className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                  <CardTitle className="text-xl">{feature.title}</CardTitle>
+              <Card key={index} className="text-center hover:shadow-lg transition-shadow h-full">
+                <CardHeader className="pb-4">
+                  <feature.icon className="h-10 w-10 sm:h-12 sm:w-12 text-blue-600 mx-auto mb-3 sm:mb-4" />
+                  <CardTitle className="text-lg sm:text-xl">{feature.title}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-gray-600">
+                <CardContent className="pt-0">
+                  <CardDescription className="text-gray-600 text-sm sm:text-base">
                     {feature.description}
                   </CardDescription>
                 </CardContent>
@@ -168,65 +180,65 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-blue-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h3 className="text-3xl font-bold mb-4">Ready to Start Your Journey?</h3>
-          <p className="text-xl mb-8 opacity-90">
+      <section className="py-16 sm:py-20 md:py-24 bg-blue-600 text-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">Ready to Start Your Journey?</h3>
+          <p className="text-lg sm:text-xl md:text-2xl mb-6 sm:mb-8 opacity-90 max-w-3xl mx-auto">
             Book your BSLEU examination today and take the first step towards professional certification
           </p>
           <Button 
             size="lg" 
             variant="secondary" 
-            className="bg-white text-blue-600 hover:bg-gray-100"
+            className="bg-white text-blue-600 hover:bg-gray-100 text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4"
             onClick={() => setCurrentView("register")}
           >
-            <Zap className="mr-2 h-5 w-5" />
+            <Zap className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
             Get Started Now
           </Button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <BookOpen className="h-6 w-6" />
+      <footer className="bg-gray-900 text-white py-12 sm:py-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+            <div className="sm:col-span-2 lg:col-span-1">
+              <div className="flex items-center space-x-2 mb-4 sm:mb-6">
+                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6" />
                 <img
                   src="/logo.png"
                   alt="BSL Akademie"
-                  className="h-10 sm:h-12 w-auto transform scale-110"
+                  className="h-8 sm:h-10 lg:h-12 w-auto"
                 />
               </div>
-              <p className="text-gray-400">
+              <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
                 Professional language certification platform trusted by thousands of students worldwide.
               </p>
             </div>
-            <div>
-              <h4 className="font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-gray-400">
+            <div className="hidden sm:block lg:block">
+              <h4 className="font-semibold mb-4 text-base sm:text-lg">Quick Links</h4>
+              <ul className="space-y-2 text-gray-400 text-sm sm:text-base">
                 {/* Removed links per requirements */}
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Contact Us</a></li>
-                <li><a href="#" className="hover:text-white">FAQ</a></li>
+              <h4 className="font-semibold mb-4 text-base sm:text-lg">Support</h4>
+              <ul className="space-y-2 text-gray-400 text-sm sm:text-base">
+                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">FAQ</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Contact</h4>
-              <div className="text-gray-400 space-y-2">
-                <p>📧 support@bsleu.com</p>
-                <p>📞 +91 1800-123-4567</p>
-                <p>🕐 Mon-Fri: 9AM-6PM</p>
+              <h4 className="font-semibold mb-4 text-base sm:text-lg">Contact</h4>
+              <div className="text-gray-400 space-y-2 text-sm sm:text-base">
+                <p className="flex items-center"><span className="mr-2">📧</span> support@bsleu.com</p>
+                <p className="flex items-center"><span className="mr-2">📞</span> +91 1800-123-4567</p>
+                <p className="flex items-center"><span className="mr-2">🕐</span> Mon-Fri: 9AM-6PM</p>
               </div>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 BSLEU. All rights reserved. | Privacy Policy | Terms of Service</p>
+          <div className="border-t border-gray-800 mt-8 sm:mt-12 pt-6 sm:pt-8 text-center text-gray-400">
+            <p className="text-xs sm:text-sm">&copy; 2024 BSLEU. All rights reserved. | Privacy Policy | Terms of Service</p>
           </div>
         </div>
       </footer>

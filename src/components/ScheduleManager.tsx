@@ -164,16 +164,17 @@ export const ScheduleManager = ({ onScheduleUpdate }: ScheduleManagerProps) => {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center justify-between">
-        <Button variant="outline" size="sm" onClick={fetchSchedules} className="gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <Button variant="outline" size="sm" onClick={fetchSchedules} className="gap-2 w-full sm:w-auto">
           <RefreshCw className="h-4 w-4" />
-          Refresh
+          <span className="hidden sm:inline">Refresh</span>
+          <span className="sm:hidden">Refresh Data</span>
         </Button>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Label>Exam Level</Label>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+            <Label className="text-sm font-medium shrink-0">Exam Level</Label>
             <Select value={levelFilter} onValueChange={setLevelFilter}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-32 lg:w-40">
                 <SelectValue placeholder="Filter by level" />
               </SelectTrigger>
               <SelectContent>
@@ -184,10 +185,10 @@ export const ScheduleManager = ({ onScheduleUpdate }: ScheduleManagerProps) => {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center gap-2">
-            <Label>Time</Label>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+            <Label className="text-sm font-medium shrink-0">Time</Label>
             <Select value={timeFilter} onValueChange={setTimeFilter}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-full sm:w-28 lg:w-32">
                 <SelectValue placeholder="Filter by time" />
               </SelectTrigger>
               <SelectContent>
@@ -200,13 +201,15 @@ export const ScheduleManager = ({ onScheduleUpdate }: ScheduleManagerProps) => {
         </div>
       </div>
       {/* Add Schedule Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogTrigger asChild>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Schedule
-          </Button>
-        </DialogTrigger>
+      <div className="flex justify-start">
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="w-full sm:w-auto">
+              <Plus className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Add Schedule</span>
+              <span className="sm:hidden">Add New</span>
+            </Button>
+          </DialogTrigger>
         <DialogContent className="max-w-[95vw] sm:max-w-lg md:max-w-xl lg:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Exam Schedule</DialogTitle>
@@ -311,34 +314,38 @@ export const ScheduleManager = ({ onScheduleUpdate }: ScheduleManagerProps) => {
           return (
             <Card key={schedule.id} className="border-l-4 border-blue-500">
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Badge className="bg-blue-100 text-blue-800">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <Badge className="bg-blue-100 text-blue-800 w-fit text-xs sm:text-sm">
                       {schedule.examLevel}
                     </Badge>
-                    <div>
-                      <h4 className="font-semibold">
-                        {format(schedule.date, "PPP")} - {schedule.testCenter}
+                    <div className="min-w-0">
+                      <h4 className="font-semibold text-sm sm:text-base">
+                        {format(schedule.date, "PPP")}
                       </h4>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-xs sm:text-sm text-gray-600">
+                        {schedule.testCenter}
+                      </p>
+                      <p className="text-xs text-gray-500">
                         {schedule.timeSlots.length} time slots available
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-blue-600">
+                  <div className="flex items-center justify-between sm:justify-end gap-2">
+                    <div className="text-left sm:text-right">
+                      <p className="text-base sm:text-lg font-bold text-blue-600">
                         {schedule.currentBookings}/{schedule.maxCapacity}
                       </p>
                       <p className="text-xs text-gray-500">Booked/Total</p>
                     </div>
-                    <Badge className={availability.color}>
+                    <Badge className={`${availability.color} text-xs`}>
                       {availability.status}
                     </Badge>
                     <Button 
                       variant="outline" 
                       size="sm"
                       onClick={() => handleDeleteSchedule(schedule.id)}
+                      className="shrink-0"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -346,7 +353,7 @@ export const ScheduleManager = ({ onScheduleUpdate }: ScheduleManagerProps) => {
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-sm mb-4">
                   <div>
                     <span className="text-gray-600">Available Seats:</span>
                     <p className="font-medium text-green-600">
@@ -375,10 +382,10 @@ export const ScheduleManager = ({ onScheduleUpdate }: ScheduleManagerProps) => {
                   </div>
                 </div>
                 <div>
-                  <span className="text-gray-600 text-sm">Time Slots:</span>
-                  <div className="flex flex-wrap gap-2 mt-1">
+                  <span className="text-gray-600 text-xs sm:text-sm">Time Slots:</span>
+                  <div className="flex flex-wrap gap-1 sm:gap-2 mt-1">
                     {schedule.timeSlots.map(slot => (
-                      <Badge key={slot} variant="outline" className="bg-green-50 text-green-700">
+                      <Badge key={slot} variant="outline" className="bg-green-50 text-green-700 text-xs capitalize">
                         {slot}
                       </Badge>
                     ))}

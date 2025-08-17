@@ -138,35 +138,44 @@ export const AdminDashboard = ({ onBack }: AdminDashboardProps) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-4">
+      <div className="bg-white shadow-sm border-b sticky top-0 z-40">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-                <p className="text-gray-600">Manage bookings, users, and system settings</p>
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+                <p className="text-gray-600 text-sm sm:text-base hidden sm:block">Manage bookings, users, and system settings</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2" />
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={onBack}
+                className="text-sm sm:text-base"
+              >
+                <span className="hidden sm:inline">Back to Site</span>
+                <span className="sm:hidden">Exit</span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Stats Cards (authorized only) */}
         {isAuthorized && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
             {statsCards.map((stat, index) => {
               const Icon = stat.icon;
               return (
-                <Card key={index}>
-                  <CardContent className="p-6">
+                <Card key={index} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4 sm:p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                        <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                        <p className="text-xs sm:text-sm font-medium text-gray-600">{stat.title}</p>
+                        <p className="text-lg sm:text-2xl font-bold text-gray-900">{stat.value}</p>
                       </div>
-                      <Icon className={`h-8 w-8 ${stat.color}`} />
+                      <Icon className={`h-6 w-6 sm:h-8 sm:w-8 ${stat.color}`} />
                     </div>
                   </CardContent>
                 </Card>
@@ -187,59 +196,60 @@ export const AdminDashboard = ({ onBack }: AdminDashboardProps) => {
             </CardContent>
           </Card>
         ) : (
-          <Tabs defaultValue="bookings" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="bookings">Bookings</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="schedule">Schedule</TabsTrigger>
+          <Tabs defaultValue="bookings" className="space-y-4 sm:space-y-6">
+          <TabsList className="grid w-full grid-cols-3 h-auto p-1">
+            <TabsTrigger value="bookings" className="text-xs sm:text-sm py-2">Bookings</TabsTrigger>
+            <TabsTrigger value="users" className="text-xs sm:text-sm py-2">Users</TabsTrigger>
+            <TabsTrigger value="schedule" className="text-xs sm:text-sm py-2">Schedule</TabsTrigger>
           </TabsList>
 
           <TabsContent value="bookings">
             <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
+              <CardHeader className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
-                    <CardTitle>Recent Bookings</CardTitle>
-                    <CardDescription>Manage and track examination bookings</CardDescription>
+                    <CardTitle className="text-lg sm:text-xl">Recent Bookings</CardTitle>
+                    <CardDescription className="text-sm sm:text-base">Manage and track examination bookings</CardDescription>
                   </div>
-          <div className="flex items-center space-x-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search bookings..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-64"
-              />
-            </div>
-            <Select value={bookingStatusFilter} onValueChange={(v) => setBookingStatusFilter(v as any)}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="confirmed">Confirmed</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        placeholder="Search bookings..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 w-full sm:w-48 lg:w-64"
+                      />
+                    </div>
+                    <Select value={bookingStatusFilter} onValueChange={(v) => setBookingStatusFilter(v as any)}>
+                      <SelectTrigger className="w-full sm:w-[140px] lg:w-[160px]">
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All statuses</SelectItem>
+                        <SelectItem value="confirmed">Confirmed</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Booking ID</TableHead>
-                      <TableHead>Student</TableHead>
-                      <TableHead>Level</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Date & Time</TableHead>
-                      <TableHead>Center</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
+              <CardContent className="p-0 sm:p-6">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-[100px]">Booking ID</TableHead>
+                        <TableHead className="min-w-[150px]">Student</TableHead>
+                        <TableHead className="min-w-[80px]">Level</TableHead>
+                        <TableHead className="min-w-[80px] hidden sm:table-cell">Type</TableHead>
+                        <TableHead className="min-w-[120px]">Date & Time</TableHead>
+                        <TableHead className="min-w-[100px] hidden lg:table-cell">Center</TableHead>
+                        <TableHead className="min-w-[80px]">Amount</TableHead>
+                        <TableHead className="min-w-[80px]">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
                   <TableBody>
                      {(bookings as any[])
                       .filter(booking => 
@@ -251,70 +261,91 @@ export const AdminDashboard = ({ onBack }: AdminDashboardProps) => {
                        .filter(booking => bookingStatusFilter === 'all' || (booking.status || '').toLowerCase() === bookingStatusFilter)
                       .map((booking) => (
                       <TableRow key={booking.id}>
-                        <TableCell className="font-medium">{booking.bookingReference || booking.id}</TableCell>
+                        <TableCell className="font-medium text-xs sm:text-sm">
+                          <span className="block truncate max-w-[80px] sm:max-w-none">
+                            {booking.bookingReference || `#${booking.id}`}
+                          </span>
+                        </TableCell>
                         <TableCell>
-                          <div>
-                            <p className="font-medium">{`${booking.User?.firstName || ''} ${booking.User?.familyName || ''}`.trim()}</p>
-                            <p className="text-sm text-gray-600">{booking.User?.email}</p>
+                          <div className="min-w-0">
+                            <p className="font-medium text-xs sm:text-sm truncate">
+                              {`${booking.User?.firstName || ''} ${booking.User?.familyName || ''}`.trim()}
+                            </p>
+                            <p className="text-xs text-gray-600 truncate hidden sm:block">
+                              {booking.User?.email}
+                            </p>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">{booking.examLevel}</Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {booking.examLevel}
+                          </Badge>
                         </TableCell>
-                        <TableCell>{booking.examType === 'full' ? 'Both' : (booking.partialComponent === 'written' ? 'Written' : 'Oral')}</TableCell>
+                        <TableCell className="hidden sm:table-cell text-xs sm:text-sm">
+                          {booking.examType === 'full' ? 'Both' : (booking.partialComponent === 'written' ? 'Written' : 'Oral')}
+                        </TableCell>
                         <TableCell>
-                          <div>
-                            <p>{booking.Schedule?.examDate}</p>
-                            <p className="text-sm text-gray-600">{booking.Schedule?.examTime === 'morning' ? 'Morning' : 'Evening'}</p>
+                          <div className="min-w-0">
+                            <p className="text-xs sm:text-sm font-medium">{booking.Schedule?.examDate}</p>
+                            <p className="text-xs text-gray-600">
+                              {booking.Schedule?.examTime === 'morning' ? 'Morning' : 'Evening'}
+                            </p>
                           </div>
                         </TableCell>
-                        <TableCell>{booking.Schedule?.testCenter}</TableCell>
-                        <TableCell className="font-medium">₹{Number(booking.examFee || 0).toLocaleString()}</TableCell>
+                        <TableCell className="hidden lg:table-cell text-xs sm:text-sm">
+                          <span className="truncate max-w-[100px]">
+                            {booking.Schedule?.testCenter}
+                          </span>
+                        </TableCell>
+                        <TableCell className="font-medium text-xs sm:text-sm">
+                          ₹{Number(booking.examFee || 0).toLocaleString()}
+                        </TableCell>
                         <TableCell>
-                          <Badge className={getStatusColor(booking.status || '')}>
+                          <Badge className={`${getStatusColor(booking.status || '')} text-xs`}>
                             {booking.status || 'pending'}
                           </Badge>
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
-                </Table>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="users">
             <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
+              <CardHeader className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
-                    <CardTitle>User Management</CardTitle>
-                    <CardDescription>View and manage registered users</CardDescription>
+                    <CardTitle className="text-lg sm:text-xl">User Management</CardTitle>
+                    <CardDescription className="text-sm sm:text-base">View and manage registered users</CardDescription>
                   </div>
-          <div className="relative flex items-center space-x-2">
+                  <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
                       placeholder="Search users..."
                       value={userSearchTerm}
                       onChange={(e) => setUserSearchTerm(e.target.value)}
-                      className="pl-10 w-64"
+                      className="pl-10 w-full sm:w-48 lg:w-64"
                     />
-            {/* Export removed */}
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <Table>
-                   <TableHeader>
-                    <TableRow>
-                      <TableHead>User ID</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Location</TableHead>
-                       <TableHead>Bookings</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
+              <CardContent className="p-0 sm:p-6">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-[80px]">User ID</TableHead>
+                        <TableHead className="min-w-[150px]">Name</TableHead>
+                        <TableHead className="min-w-[100px] hidden sm:table-cell">Contact</TableHead>
+                        <TableHead className="min-w-[120px] hidden lg:table-cell">Location</TableHead>
+                        <TableHead className="min-w-[80px]">Bookings</TableHead>
+                        <TableHead className="min-w-[80px]">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
                   <TableBody>
                     {(usersData as any[])
                       .filter((user) => {
@@ -329,20 +360,34 @@ export const AdminDashboard = ({ onBack }: AdminDashboardProps) => {
                       .map((user) => {
                         return (
                           <TableRow key={user.id}>
-                            <TableCell className="font-medium">
-                              <span title={String(user.id)}>{formatUserId(user.id)}</span>
+                            <TableCell className="font-medium text-xs sm:text-sm">
+                              <span title={String(user.id)} className="block truncate max-w-[70px] sm:max-w-none">
+                                {formatUserId(user.id)}
+                              </span>
                             </TableCell>
                             <TableCell>
-                              <div>
-                                <p className="font-medium">{`${user.firstName || ''} ${user.familyName || ''}`.trim()}</p>
-                                <p className="text-sm text-gray-600">{user.email}</p>
+                              <div className="min-w-0">
+                                <p className="font-medium text-xs sm:text-sm truncate">
+                                  {`${user.firstName || ''} ${user.familyName || ''}`.trim()}
+                                </p>
+                                <p className="text-xs text-gray-600 truncate">
+                                  {user.email}
+                                </p>
                               </div>
                             </TableCell>
-                            <TableCell>{user.telephone || '-'}</TableCell>
-                            <TableCell>{user.currentCity || user.placeOfResidence || '-'}</TableCell>
-                            <TableCell>{userIdToBookingsCount.get(user.id) || 0}</TableCell>
+                            <TableCell className="hidden sm:table-cell text-xs sm:text-sm">
+                              {user.telephone || '-'}
+                            </TableCell>
+                            <TableCell className="hidden lg:table-cell text-xs sm:text-sm">
+                              <span className="truncate max-w-[100px]">
+                                {user.currentCity || user.placeOfResidence || '-'}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-xs sm:text-sm font-medium text-center">
+                              {userIdToBookingsCount.get(user.id) || 0}
+                            </TableCell>
                             <TableCell>
-                              <Badge className={getStatusColor(user.isActive ? 'active' : 'inactive')}>
+                              <Badge className={`${getStatusColor(user.isActive ? 'active' : 'inactive')} text-xs`}>
                                 {user.isActive ? 'Active' : 'Inactive'}
                               </Badge>
                             </TableCell>
@@ -350,18 +395,19 @@ export const AdminDashboard = ({ onBack }: AdminDashboardProps) => {
                         );
                       })}
                   </TableBody>
-                </Table>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="schedule">
             <Card>
-              <CardHeader>
-                <CardTitle>Exam Schedule Management</CardTitle>
-                <CardDescription>Manage exam availability for each level</CardDescription>
+              <CardHeader className="space-y-2">
+                <CardTitle className="text-lg sm:text-xl">Exam Schedule Management</CardTitle>
+                <CardDescription className="text-sm sm:text-base">Manage exam availability for each level</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-6">
                 <ScheduleManager />
               </CardContent>
             </Card>

@@ -74,6 +74,27 @@ const getAuthHeaders = () => {
   };
 };
 
+// Enhanced fetch with timeout and better error handling for production
+const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout = 30000) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Request timed out. Please check your connection and try again.');
+    }
+    throw error;
+  }
+};
+
 const handleResponse = async (response: Response): Promise<ApiResponse> => {
   let data: ApiResponse;
   try {
@@ -89,11 +110,11 @@ const handleResponse = async (response: Response): Promise<ApiResponse> => {
 export const authAPI = {
   register: async (userData: RegistrationData): Promise<ApiResponse> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      const response = await fetchWithTimeout(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(userData),
-      });
+      }, 45000); // Longer timeout for registration
 
       // Attempt to parse JSON regardless of status
       let data: ApiResponse;
@@ -122,7 +143,7 @@ export const authAPI = {
   },
 
   login: async (email: string, password: string): Promise<ApiResponse> => {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetchWithTimeout(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ email, password }),

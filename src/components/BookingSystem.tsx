@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { BookingConfirmation } from "@/components/BookingConfirmation";
 import { bookingAPI, scheduleAPI, type BookingData } from "@/services/api";
+import { useFormPersistence } from "@/hooks/use-form-persistence";
 
 interface BookingSystemProps {
   onBack: () => void;
@@ -18,19 +19,44 @@ interface BookingSystemProps {
 
 export const BookingSystem = ({ onBack }: BookingSystemProps) => {
   const [step, setStep] = useState(1);
-  const [selectedLevel, setSelectedLevel] = useState("");
-  const [examType, setExamType] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedTime, setSelectedTime] = useState("");
-  const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(null);
   const [schedules, setSchedules] = useState<any[]>([]);
   const [isLoadingSchedules, setIsLoadingSchedules] = useState(false);
   const [testCenter] = useState("BSLEU Main Center, New Delhi");
-  const [uploadedPrerequisite, setUploadedPrerequisite] = useState<File | null>(null);
   const [bookingReference, setBookingReference] = useState("");
   const [bookingId, setBookingId] = useState<number | null>(null);
-  const [termsAccepted, setTermsAccepted] = useState(false);
   const { toast } = useToast();
+
+  // Use form persistence for booking data
+  const initialBookingData = {
+    selectedLevel: "",
+    examType: "",
+    selectedDate: undefined as Date | undefined,
+    selectedTime: "",
+    selectedScheduleId: null as number | null,
+    uploadedPrerequisite: null as File | null,
+    termsAccepted: false
+  };
+
+  const {
+    formData: bookingData,
+    updateField,
+    clearFormData
+  } = useFormPersistence({
+    key: 'booking',
+    initialData: initialBookingData,
+    clearOnSubmit: false // Keep data until booking is complete
+  });
+
+  // Destructure for easier access
+  const {
+    selectedLevel,
+    examType,
+    selectedDate,
+    selectedTime,
+    selectedScheduleId,
+    uploadedPrerequisite,
+    termsAccepted
+  } = bookingData;
 
   const examLevels = [
     { value: "A1", label: "A1 - Beginner", fee: 20060, description: "Understanding familiar everyday expressions, basic personal communication", type: "full", note: "Including GST" },
@@ -75,17 +101,17 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
   // Ensure examType matches level selection: full levels force "both"; partial levels require user to choose written/oral
   useEffect(() => {
     if (!selectedLevel) {
-      setExamType("");
-      setUploadedPrerequisite(null);
+      updateField('examType', "");
+      updateField('uploadedPrerequisite', null);
       return;
     }
     if (isPartialLevel) {
-      if (examType === 'both') setExamType("");
+      if (examType === 'both') updateField('examType', "");
     } else {
-      setExamType('both');
-      setUploadedPrerequisite(null);
+      updateField('examType', 'both');
+      updateField('uploadedPrerequisite', null);
     }
-  }, [selectedLevel, isPartialLevel]);
+  }, [selectedLevel, isPartialLevel, examType, updateField]);
 
   // Fetch schedules provided by admin for the selected level/type
   useEffect(() => {
@@ -142,8 +168,8 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
   };
 
   const handleExamTypeSelection = (type: string) => {
-    setExamType(type);
-    setUploadedPrerequisite(null); // Reset prerequisite upload when changing exam type
+    updateField('examType', type);
+    updateField('uploadedPrerequisite', null); // Reset prerequisite upload when changing exam type
   };
 
   // Pure predicate for enabling Next button in step 1
@@ -212,7 +238,7 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
         <label className="text-sm font-medium text-gray-700 mb-3 block">
           Select Examination Level *
         </label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           {examLevels.map((level) => (
             <Card
               key={level.value}
@@ -221,7 +247,7 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
                   ? "ring-2 ring-blue-500 bg-blue-50"
                   : "hover:shadow-md"
               }`}
-              onClick={() => setSelectedLevel(level.value)}
+              onClick={() => updateField('selectedLevel', level.value)}
             >
               <CardContent className="p-4">
                 <div className="flex justify-between items-start">
@@ -303,7 +329,7 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
             You must upload your {getSelectedExamType()?.prerequisiteType} exam certificate to book this exam type.
           </p>
           <DocumentUpload
-            onUpload={setUploadedPrerequisite}
+            onUpload={(file) => updateField('uploadedPrerequisite', file)}
             acceptedTypes=".pdf,.jpg,.jpeg,.png"
             maxSize={10 * 1024 * 1024} // 10MB
             description="Upload your previous exam certificate"
@@ -323,7 +349,7 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
     <div className="space-y-6">
       {/* Test center selection removed per single-center model */}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <div>
           <label className="text-sm font-medium text-gray-700 mb-3 block">
             Select Date *
@@ -331,7 +357,7 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
           <Calendar
             mode="single"
             selected={selectedDate}
-            onSelect={setSelectedDate}
+            onSelect={(date) => updateField('selectedDate', date)}
             disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
             className="rounded-md border pointer-events-auto"
           />
@@ -342,7 +368,7 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
             <label className="text-sm font-medium text-gray-700 mb-3 block">
               Available Time Slots for {format(selectedDate, "PPP")} *
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
               {isLoadingSchedules && <span className="text-sm text-gray-500">Loading schedules...</span>}
               {!isLoadingSchedules && availableTimeSlots.length === 0 && (
                 <span className="text-sm text-gray-500">No schedules available for this date.</span>
@@ -354,8 +380,8 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
                   size="sm"
                   onClick={() => {
                     if (!slot.available) return;
-                    setSelectedTime(slot.value);
-                    setSelectedScheduleId(slot.scheduleId);
+                    updateField('selectedTime', slot.value);
+                    updateField('selectedScheduleId', slot.scheduleId);
                   }}
                   disabled={!slot.available}
                   className={`flex items-center justify-center ${!slot.available ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -429,7 +455,7 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
               type="checkbox"
               id="terms"
               checked={termsAccepted}
-              onChange={(e) => setTermsAccepted(e.target.checked)}
+              onChange={(e) => updateField('termsAccepted', e.target.checked)}
               className="mt-1"
             />
             <label htmlFor="terms" className="text-sm text-gray-700">
@@ -490,80 +516,80 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
       totalAmount={getSelectedLevelFee()}
           onNewBooking={() => {
         setStep(1);
-        setSelectedLevel("");
-        setExamType("");
-        setSelectedDate(undefined);
-        setSelectedTime("");
-        setUploadedPrerequisite(null);
+        clearFormData(); // Clear all persisted data when starting fresh
         setBookingReference("");
-        setTermsAccepted(false);
       }}
     />
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-8">
-      <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto">
-          <div className="mb-8">
-            <Button variant="ghost" onClick={onBack} className="mb-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-4 sm:py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-6 sm:mb-8">
+            <Button variant="ghost" onClick={onBack} className="mb-4 text-sm sm:text-base">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Registration
+              <span className="hidden sm:inline">Back to Registration</span>
+              <span className="sm:hidden">Back</span>
             </Button>
-            <h1 className="text-3xl font-bold text-gray-900">Book Your Examination</h1>
-            <p className="text-gray-600 mt-2">Select your exam details and complete the booking</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Book Your Examination</h1>
+            <p className="text-gray-600 mt-2 text-sm sm:text-base">Select your exam details and complete the booking</p>
           </div>
 
           {step < 4 && (
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8">
               <div className="flex items-center">
                 <div className={`flex items-center ${step >= 1 ? 'text-blue-600' : 'text-gray-400'}`}>
-                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${step >= 1 ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'}`}>
+                  <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center text-xs sm:text-base ${step >= 1 ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'}`}>
                     1
                   </div>
-                  <span className="ml-2 font-medium">Exam Details</span>
+                  <span className="ml-2 font-medium text-sm sm:text-base">
+                    <span className="hidden sm:inline">Exam Details</span>
+                    <span className="sm:hidden">Details</span>
+                  </span>
                 </div>
-                <div className={`flex-1 h-1 mx-4 ${step >= 2 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
+                <div className={`flex-1 h-1 mx-2 sm:mx-4 ${step >= 2 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
                 <div className={`flex items-center ${step >= 2 ? 'text-blue-600' : 'text-gray-400'}`}>
-                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${step >= 2 ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'}`}>
+                  <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center text-xs sm:text-base ${step >= 2 ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'}`}>
                     2
                   </div>
-                  <span className="ml-2 font-medium">Schedule</span>
+                  <span className="ml-2 font-medium text-sm sm:text-base">Schedule</span>
                 </div>
-                <div className={`flex-1 h-1 mx-4 ${step >= 3 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
+                <div className={`flex-1 h-1 mx-2 sm:mx-4 ${step >= 3 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
                 <div className={`flex items-center ${step >= 3 ? 'text-blue-600' : 'text-gray-400'}`}>
-                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${step >= 3 ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'}`}>
+                  <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center text-xs sm:text-base ${step >= 3 ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'}`}>
                     3
                   </div>
-                  <span className="ml-2 font-medium">Payment</span>
+                  <span className="ml-2 font-medium text-sm sm:text-base">Payment</span>
                 </div>
               </div>
             </div>
           )}
 
           {step < 4 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>
+            <Card className="shadow-lg">
+              <CardHeader className="pb-4 sm:pb-6">
+                <CardTitle className="text-lg sm:text-xl lg:text-2xl">
                   {step === 1 && "Select Examination Details"}
                   {step === 2 && "Choose Date & Time"}
                   {step === 3 && "Review & Payment"}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-sm sm:text-base">
                   {step === 1 && "Choose your exam level and type"}
                   {step === 2 && "Select your preferred test center, date and time"}
                   {step === 3 && "Review your booking and complete payment"}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 {step === 1 && renderStep1()}
                 {step === 2 && renderStep2()}
                 {step === 3 && renderStep3()}
                 
-                <div className="flex justify-between mt-8">
+                <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 sm:mt-8">
                   {step > 1 && (
-                    <Button variant="outline" onClick={() => setStep(step - 1)}>
-                      Previous
+                    <Button variant="outline" onClick={() => setStep(step - 1)} className="order-2 sm:order-1">
+                      <span className="hidden sm:inline">Previous</span>
+                      <span className="sm:hidden">Back</span>
                     </Button>
                   )}
                   {step < 3 && (
@@ -575,13 +601,14 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
                           setStep(step + 1);
                         }
                       }} 
-                      className="ml-auto"
+                      className="ml-auto order-1 sm:order-2"
                       disabled={
                         (step === 1 && !canProceedStep1()) ||
                         (step === 2 && (!selectedDate || !selectedTime || !selectedScheduleId))
                       }
                     >
-                      Next
+                      <span className="hidden sm:inline">Next</span>
+                      <span className="sm:hidden">Continue</span>
                     </Button>
                   )}
                 </div>
