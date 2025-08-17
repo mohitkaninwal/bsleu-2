@@ -48,12 +48,14 @@ const startServer = async () => {
       });
     }
 
-    // In production, serve built frontend from dist
+    // In production, just serve API (frontend is deployed separately)
     if (process.env.NODE_ENV === 'production') {
-      const clientDist = path.resolve(__dirname, '../../dist');
-      app.use(express.static(clientDist));
-      app.get('*', (_req, res) => {
-        res.sendFile(path.join(clientDist, 'index.html'));
+      app.get('/', (_req, res) => {
+        res.status(200).json({ 
+          message: 'BSLEU API server is running',
+          status: 'healthy',
+          version: '1.0.0'
+        });
       });
     }
     app.use(notFound);
