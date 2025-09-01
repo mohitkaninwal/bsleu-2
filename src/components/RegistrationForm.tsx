@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,16 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  
+  // Ref to manage validation timeouts
+  const validationTimeoutRef = useRef<{ [key: string]: NodeJS.Timeout }>({});
+  
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(validationTimeoutRef.current).forEach(clearTimeout);
+    };
+  }, []);
   
   // Use form persistence hook to auto-save and restore form data
   const initialFormData = {
@@ -90,12 +100,12 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
     national_id: /^\d{12}$|^[A-Z0-9]{6,18}$/i,
   };
 
-  const validateIdNumber = (idType: string, value: string | Date | undefined): boolean => {
+  const validateIdNumber = useCallback((idType: string, value: string | Date | undefined): boolean => {
     if (!value || typeof value !== 'string') return false;
     const pattern = idValidationPatterns[idType];
     if (!pattern) return true;
     return pattern.test(value.trim());
-  };
+  }, []);
 
   const examLevels = [
     { value: "A1", label: "A1 - Beginner (₹20,060)", type: "full" },
@@ -109,27 +119,27 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
   ];
 
   // Helper function to check if exam is partial
-  const isPartialExam = (examLevel: string) => {
+  const isPartialExam = useCallback((examLevel: string) => {
     return examLevel.includes('-P');
-  };
+  }, []);
 
-  // Real-time validation functions
-  const validateEmail = (email: string): boolean => {
+  // Memoized validation functions to prevent re-creation on every render
+  const validateEmail = useCallback((email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
-  };
+  }, []);
 
-  const validateName = (name: string): boolean => {
+  const validateName = useCallback((name: string): boolean => {
     const nameRegex = /^[a-zA-Z\s'.-]{2,50}$/;
     return nameRegex.test(name);
-  };
+  }, []);
 
-  const validateTelephone = (telephone: string): boolean => {
+  const validateTelephone = useCallback((telephone: string): boolean => {
     const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
     return phoneRegex.test(telephone.replace(/\s/g, ''));
-  };
+  }, []);
 
-  const validateField = (fieldName: string, value: string | Date | undefined): string => {
+  const validateField = useCallback((fieldName: string, value: string | Date | undefined): string => {
     switch (fieldName) {
       case 'familyName':
         if (!value) return 'Surname/Family name is required (use "..." if none)';
@@ -169,25 +179,34 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
         if (!value) return `${fieldName.replace(/([A-Z])/g, ' $1').toLowerCase()} is required`;
         return '';
     }
-  };
+  }, [validateName, validateEmail, validateTelephone, validateIdNumber, formData.idType, idTypes]);
 
   // Removed manual date parsing and input change; only calendar selection is supported now
 
-  const handleFieldChange = (fieldName: string, value: string | Date | File | null | undefined) => {
+  const handleFieldChange = useCallback((fieldName: string, value: string | Date | File | null | undefined) => {
     updateField(fieldName, value);
     
     // Date is selected only via calendar now; no manual input syncing needed
     
-    // Real-time validation
+    // Clear any existing validation timeout for this field
+    if (validationTimeoutRef.current[fieldName]) {
+      clearTimeout(validationTimeoutRef.current[fieldName]);
+    }
+    
+    // Debounced validation to prevent excessive re-renders
     const fileFields = ['passportFront', 'passportBack', 'passportPhoto', 'telcCertificate'];
     if (fileFields.includes(fieldName)) {
       setErrors(prev => ({ ...prev, [fieldName]: '' }));
       return;
     }
 
-    const error = validateField(fieldName, (value as unknown) as string | Date | undefined);
-    setErrors(prev => ({ ...prev, [fieldName]: error }));
-  };
+    // Use setTimeout to debounce validation for text inputs
+    validationTimeoutRef.current[fieldName] = setTimeout(() => {
+      const error = validateField(fieldName, (value as unknown) as string | Date | undefined);
+      setErrors(prev => ({ ...prev, [fieldName]: error }));
+      delete validationTimeoutRef.current[fieldName];
+    }, 150); // 150ms debounce for validation
+  }, [updateField, validateField]);
 
   const validateStep = (stepNumber: number): boolean => {
     const newErrors: FormErrors = {};
@@ -365,7 +384,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
           <Label htmlFor="familyName">Family Name *</Label>
           <Input
             id="familyName"
-            value={formData.familyName}
+            value={formData.familyName || ""}
             onChange={(e) => handleFieldChange('familyName', e.target.value)}
             placeholder="Enter your family name"
             className={cn("mt-1", errors.familyName && "border-red-500")}
@@ -381,7 +400,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
           <Label htmlFor="firstName">First Name *</Label>
           <Input
             id="firstName"
-            value={formData.firstName}
+            value={formData.firstName || ""}
             onChange={(e) => handleFieldChange('firstName', e.target.value)}
             placeholder="Enter your first name"
             className={cn("mt-1", errors.firstName && "border-red-500")}
@@ -400,7 +419,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
         <Input
           id="email"
           type="email"
-          value={formData.email}
+          value={formData.email || ""}
           onChange={(e) => handleFieldChange('email', e.target.value)}
           placeholder="Enter your email address"
           className={cn("mt-1", errors.email && "border-red-500")}
@@ -418,7 +437,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
         <Input
           id="telephone"
           type="tel"
-          value={formData.telephone}
+          value={formData.telephone || ""}
           onChange={(e) => handleFieldChange('telephone', e.target.value)}
           placeholder="Enter your phone number"
           className={cn("mt-1", errors.telephone && "border-red-500")}
@@ -526,7 +545,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
           <Label htmlFor="countryOfBirth">Country of Birth *</Label>
           <Input
             id="countryOfBirth"
-            value={formData.countryOfBirth}
+            value={formData.countryOfBirth || ""}
             onChange={(e) => handleFieldChange('countryOfBirth', e.target.value)}
             placeholder="Enter country of birth"
             className={cn("mt-1", errors.countryOfBirth && "border-red-500")}
@@ -542,7 +561,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
           <Label htmlFor="birthPlace">Birth Place *</Label>
           <Input
             id="birthPlace"
-            value={formData.birthPlace}
+            value={formData.birthPlace || ""}
             onChange={(e) => handleFieldChange('birthPlace', e.target.value)}
             placeholder="Enter birth place"
             className={cn("mt-1", errors.birthPlace && "border-red-500")}
@@ -584,7 +603,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
           <Label htmlFor="currentCity">Current City of Residence *</Label>
           <Input
             id="currentCity"
-            value={formData.currentCity}
+            value={formData.currentCity || ""}
             onChange={(e) => handleFieldChange('currentCity', e.target.value)}
             placeholder="Enter current city"
             className={cn("mt-1", errors.currentCity && "border-red-500")}
@@ -602,7 +621,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
         <Label htmlFor="currentCountry">Current Country of Residence *</Label>
         <Input
           id="currentCountry"
-          value={formData.currentCountry}
+          value={formData.currentCountry || ""}
           onChange={(e) => handleFieldChange('currentCountry', e.target.value)}
           placeholder="Enter current country of residence"
           className={cn("mt-1", errors.currentCountry && "border-red-500")}
@@ -654,7 +673,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
             <Label htmlFor="idNumber">Document Number *</Label>
             <Input
               id="idNumber"
-              value={formData.idNumber}
+              value={formData.idNumber || ""}
               onChange={(e) => handleFieldChange('idNumber', e.target.value.toUpperCase())}
               placeholder={getIdNumberPlaceholder(formData.idType)}
               className={cn("mt-1", errors.idNumber && "border-red-500")}

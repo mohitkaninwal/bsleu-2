@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface UseFormPersistenceOptions {
   key: string;
@@ -13,14 +13,12 @@ export function useFormPersistence<T extends Record<string, any>>({
   saveOnChange = true,
   clearOnSubmit = true
 }: UseFormPersistenceOptions) {
-  // State to hold the current form data
-  const [formData, setFormData] = useState<T>(initialData);
+  // Create a stable reference to initial data to prevent re-renders
+  const initialDataRef = useRef(initialData);
   
-  // Flag to track if data was loaded from storage
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
-
-  // Load data from localStorage on component mount
-  useEffect(() => {
+  // State to hold the current form data - start with empty object to prevent controlled/uncontrolled switch
+  const [formData, setFormData] = useState<T>(() => {
+    // Try to load from localStorage immediately during initialization
     try {
       const savedData = localStorage.getItem(`form_${key}`);
       if (savedData) {
@@ -43,35 +41,46 @@ export function useFormPersistence<T extends Record<string, any>>({
         }, {} as any);
         
         // Merge with initial data to ensure all required fields exist
-        const mergedData = { ...initialData, ...processedData };
-        setFormData(mergedData);
+        return { ...initialData, ...processedData };
       }
     } catch (error) {
       console.warn(`Failed to load form data for key ${key}:`, error);
-    } finally {
-      setIsDataLoaded(true);
     }
-  }, [key, initialData]);
+    
+    return initialData;
+  });
+  
+  // Flag to track if data was loaded from storage
+  const [isDataLoaded, setIsDataLoaded] = useState(true); // Set to true since we load in useState
 
-  // Save data to localStorage whenever form data changes
+  // Update initial data reference if it changes (but don't reload from storage)
+  useEffect(() => {
+    initialDataRef.current = initialData;
+  }, [initialData]);
+
+  // Save data to localStorage with debouncing to prevent excessive saves
   useEffect(() => {
     if (isDataLoaded && saveOnChange) {
-      try {
-        // Filter out File objects and undefined values before saving
-        const dataToSave = Object.keys(formData).reduce((acc, key) => {
-          const value = formData[key];
-          // Skip File objects (for security) and undefined values
-          if (value instanceof File || value === undefined) {
+      const timeoutId = setTimeout(() => {
+        try {
+          // Filter out File objects and undefined values before saving
+          const dataToSave = Object.keys(formData).reduce((acc, key) => {
+            const value = formData[key];
+            // Skip File objects (for security) and undefined values
+            if (value instanceof File || value === undefined) {
+              return acc;
+            }
+            acc[key] = value;
             return acc;
-          }
-          acc[key] = value;
-          return acc;
-        }, {} as any);
-        
-        localStorage.setItem(`form_${key}`, JSON.stringify(dataToSave));
-      } catch (error) {
-        console.warn(`Failed to save form data for key ${key}:`, error);
-      }
+          }, {} as any);
+          
+          localStorage.setItem(`form_${key}`, JSON.stringify(dataToSave));
+        } catch (error) {
+          console.warn(`Failed to save form data for key ${key}:`, error);
+        }
+      }, 300); // Debounce for 300ms
+
+      return () => clearTimeout(timeoutId);
     }
   }, [formData, key, saveOnChange, isDataLoaded]);
 
@@ -97,11 +106,11 @@ export function useFormPersistence<T extends Record<string, any>>({
   const clearFormData = useCallback(() => {
     try {
       localStorage.removeItem(`form_${key}`);
-      setFormData(initialData);
+      setFormData(initialDataRef.current);
     } catch (error) {
       console.warn(`Failed to clear form data for key ${key}:`, error);
     }
-  }, [key, initialData]);
+  }, [key]);
 
   // Function to manually save data
   const saveFormData = useCallback(() => {
