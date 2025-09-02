@@ -68,13 +68,13 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="container mx-auto px-0 sm:px-2 lg:px-3 py-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <img
                 src="/logo.png"
                 alt="BSL Akademie logo"
-                className="h-8 sm:h-10 md:h-12 lg:h-14 w-auto"
+                className="h-14 sm:h-16 md:h-18 lg:h-20 w-auto"
               />
             </div>
             
@@ -260,32 +260,61 @@ const Index = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-blue-50 to-green-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 sm:mb-12">
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Why Students Choose BSLEU
+            </h3>
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+              Experience the advantages that make us the preferred choice for language certification
+            </p>
+          </div>
+          
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
-            <div className="text-center p-4 sm:p-6 rounded-lg hover:bg-gray-50 transition-colors">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-600 mb-2">250+</div>
-              <div className="text-sm sm:text-base text-gray-600">Slots Available</div>
+            {/* Slots Available */}
+            <div className="group relative">
+              <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-blue-100">
+                <div className="absolute top-4 right-4 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                  <Users className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-blue-600 mb-3">250+</div>
+                <div className="text-lg sm:text-xl font-semibold text-gray-800">Slots Available</div>
+              </div>
             </div>
-            <div className="text-center p-4 sm:p-6 rounded-lg hover:bg-gray-50 transition-colors">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-600 mb-2">A1 to C1</div>
-              <div className="text-sm sm:text-base text-gray-600">Exams every Month</div>
+
+            {/* Exams Every Month */}
+            <div className="group relative">
+              <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-green-100">
+                <div className="absolute top-4 right-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                  <Calendar className="h-6 w-6 text-green-600" />
+                </div>
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-green-600 mb-3">A1 to C1</div>
+                <div className="text-lg sm:text-xl font-semibold text-gray-800">Exams Every Month</div>
+              </div>
             </div>
-            <div className="text-center p-4 sm:p-6 rounded-lg hover:bg-gray-50 transition-colors">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-orange-600 mb-2">3 Weeks</div>
-              <div className="text-sm sm:text-base text-gray-600">Results Timeline</div>
+
+            {/* Results Timeline */}
+            <div className="group relative">
+              <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-orange-100">
+                <div className="absolute top-4 right-4 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                  <CheckCircle className="h-6 w-6 text-orange-600" />
+                </div>
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-orange-600 mb-3">3 Weeks</div>
+                <div className="text-lg sm:text-xl font-semibold text-gray-800">Results Timeline</div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Exam Levels */}
-      <section id="language-levels" ref={examLevelsSectionRef} className="py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
+      <section id="language-levels" ref={examLevelsSectionRef} className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
-          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+          <div className="text-center mb-8 sm:mb-12">
             <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">Choose Your Proficiency Level</h3>
             <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-4">
-            system…  Our structured examination system encompasses all
+            Our structured examination system encompasses all
 proficiency levels, from basic to advance. Select the level that matches your current language goal for
 Full or Partial Exams.
             </p>
@@ -299,7 +328,7 @@ Full or Partial Exams.
       </section>
 
       {/* About Us Section */}
-      <section id="about-us" className="py-12 sm:py-16 md:py-20 lg:py-24 bg-white">
+      <section id="about-us" className="py-8 sm:py-12 md:py-16 bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 sm:mb-16 lg:mb-20">
             <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">About Us</h3>
@@ -308,11 +337,8 @@ Full or Partial Exams.
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 max-w-6xl mx-auto">
             {/* Mr. Heinz */}
-            <Card className="hover:shadow-lg transition-shadow duration-300 h-full">
+            <Card className="hover:shadow-lg transition-all duration-300 h-full border-l-4 border-l-blue-500 bg-gradient-to-br from-white to-blue-50/30">
               <CardHeader className="text-center pb-4">
-                <div className="w-24 h-24 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Users className="h-12 w-12 text-blue-600" />
-                </div>
                 <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                   Meet Mr. Heinz
                 </CardTitle>
@@ -321,21 +347,23 @@ Full or Partial Exams.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-gray-600 leading-relaxed">
-                  At the heart of BSLEU Akademie stands Mr. Heinz, our German founder, bringing over 15 years of expertise in conducting telc exams both in Germany and abroad. A government-approved teacher in Germany, he has guided learners across all age groups — from young students to seasoned professionals.
-                </p>
-                <p className="text-gray-600 leading-relaxed">
-                  Since 2010, Mr. Heinz has successfully conducted more than 10,000 telc exams, a testament not only to his vast experience but also to the trust telc gGmbH places in his ethics, precision, and commitment. His leadership ensures that candidates from South Asia can rely on BSLEU Akademie for the same standards of quality and trust upheld in Germany.
-                </p>
+                <div className="relative">
+                  <div className="absolute left-0 top-0 w-1 h-full bg-blue-200 rounded-full"></div>
+                  <div className="pl-4">
+                    <p className="text-gray-600 leading-relaxed">
+                      At the heart of BSLEU Akademie stands Mr. Heinz, our German founder, bringing over 15 years of expertise in conducting telc exams both in Germany and abroad. A government-approved teacher in Germany, he has guided learners across all age groups — from young students to seasoned professionals.
+                    </p>
+                    <p className="text-gray-600 leading-relaxed mt-4">
+                      Since 2010, Mr. Heinz has successfully conducted more than 10,000 telc exams, a testament not only to his vast experience but also to the trust telc gGmbH places in his ethics, precision, and commitment. His leadership ensures that candidates from South Asia can rely on BSLEU Akademie for the same standards of quality and trust upheld in Germany.
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
             {/* Mr. Aarsh S. Arun */}
-            <Card className="hover:shadow-lg transition-shadow duration-300 h-full">
+            <Card className="hover:shadow-lg transition-all duration-300 h-full border-l-4 border-l-green-500 bg-gradient-to-br from-white to-green-50/30">
               <CardHeader className="text-center pb-4">
-                <div className="w-24 h-24 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-                  <Globe className="h-12 w-12 text-green-600" />
-                </div>
                 <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                   Meet Mr. Aarsh S. Arun
                 </CardTitle>
@@ -344,12 +372,17 @@ Full or Partial Exams.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-gray-600 leading-relaxed">
-                  With over 10 years of dedicated experience in global markets, Aarsh S. Arun is passionate about building bridges between talent and opportunity worldwide. As an advisor to leading international firms, he has worked extensively across Europe, the Middle East, and North America, shaping strategies in recruitment, education, and workforce mobility.
-                </p>
-                <p className="text-gray-600 leading-relaxed">
-                  At BSLEU Akademie LLP, Aarsh champions youth-driven growth, language training, and global career pathways. His vision is simple yet powerful — to create transparent, future-ready opportunities for students and professionals, making international careers more accessible than ever.
-                </p>
+                <div className="relative">
+                  <div className="absolute left-0 top-0 w-1 h-full bg-green-200 rounded-full"></div>
+                  <div className="pl-4">
+                    <p className="text-gray-600 leading-relaxed">
+                      With over 10 years of dedicated experience in global markets, Aarsh S. Arun is passionate about building bridges between talent and opportunity worldwide. As an advisor to leading international firms, he has worked extensively across Europe, the Middle East, and North America, shaping strategies in recruitment, education, and workforce mobility.
+                    </p>
+                    <p className="text-gray-600 leading-relaxed mt-4">
+                      At BSLEU Akademie LLP, Aarsh champions youth-driven growth, language training, and global career pathways. His vision is simple yet powerful — to create transparent, future-ready opportunities for students and professionals, making international careers more accessible than ever.
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -401,49 +434,36 @@ Full or Partial Exams.
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 sm:py-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-            <div className="sm:col-span-2 lg:col-span-1">
-              <div className="flex items-center space-x-2 mb-4 sm:mb-6">
-                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6" />
-                <img
-                  src="/logo.png"
-                  alt="BSL Akademie"
-                  className="h-8 sm:h-10 lg:h-12 w-auto"
-                />
-              </div>
-              <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
-              telc Language Certification platform trusted by thousands of students worldwide.
-              </p>
-            </div>
-            <div className="hidden sm:block lg:block">
-              <h4 className="font-semibold mb-4 text-base sm:text-lg">Quick Links</h4>
-              <ul className="space-y-2 text-gray-400 text-sm sm:text-base">
-                {/* Removed links per requirements */}
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4 text-base sm:text-lg">Support</h4>
-              <ul className="space-y-2 text-gray-400 text-sm sm:text-base">
-                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">FAQ</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4 text-base sm:text-lg">Contact</h4>
-              <div className="text-gray-400 space-y-2 text-sm sm:text-base">
-                <p className="flex items-center"><span className="mr-2">📧</span> support@bsleu.com</p>
-                <p className="flex items-center"><span className="mr-2">📞</span> +91 1800-123-4567</p>
-                <p className="flex items-center"><span className="mr-2">🕐</span> Mon-Fri: 9AM-6PM</p>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 sm:mt-12 pt-6 sm:pt-8 text-center text-gray-400">
-            <p className="text-xs sm:text-sm">&copy; 2024 BSLEU. All rights reserved. | Privacy Policy | Terms of Service</p>
-          </div>
-        </div>
-      </footer>
+             <footer className="bg-gray-900 text-white py-12 sm:py-16">
+         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+             <div className="text-center lg:text-left">
+               <div className="flex items-center justify-center lg:justify-start space-x-2 mb-4 sm:mb-6">
+                 <BookOpen className="h-5 w-5 sm:h-6 sm:w-6" />
+                 <img
+                   src="/logo.png"
+                   alt="BSL Akademie"
+                   className="h-8 sm:h-10 lg:h-12 w-auto"
+                 />
+               </div>
+               <p className="text-gray-400 text-sm sm:text-base leading-relaxed max-w-md mx-auto lg:mx-0">
+               telc Language Certification platform trusted by thousands of students worldwide.
+               </p>
+             </div>
+             <div className="text-center lg:text-right">
+               <h4 className="font-semibold mb-4 text-base sm:text-lg">Contact</h4>
+               <div className="text-gray-400 space-y-2 text-sm sm:text-base">
+                 <p className="flex items-center justify-center lg:justify-end"><span className="mr-2">📧</span> support@bsleu.com</p>
+                 <p className="flex items-center justify-center lg:justify-end"><span className="mr-2">📞</span> +91 1800-123-4567</p>
+                 <p className="flex items-center justify-center lg:justify-end"><span className="mr-2">🕐</span> Mon-Fri: 9AM-6PM</p>
+               </div>
+             </div>
+           </div>
+           <div className="border-t border-gray-800 mt-8 sm:mt-12 pt-6 sm:pt-8 text-center text-gray-400">
+             <p className="text-xs sm:text-sm">&copy; 2025 BSLEU. All rights reserved. | Privacy Policy | Terms of Service</p>
+           </div>
+         </div>
+       </footer>
     </div>
   );
 };
