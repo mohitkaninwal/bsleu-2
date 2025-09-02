@@ -114,7 +114,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
     { value: "B2", label: "B2 - Upper Intermediate (₹21,240)", type: "full" },
     { value: "B1-P", label: "B1 Partial (₹20,650)", type: "partial" },
     { value: "B2-P", label: "B2 Partial (₹20,650)", type: "partial" },
-    { value: "C1", label: "C1 - Advanced (₹23,600)", type: "full" },
+    { value: "C1", label: "C1 - University (₹23,600)", type: "full" },
     { value: "C1-P", label: "C1 Partial (₹23,010)", type: "partial" },
   ];
 

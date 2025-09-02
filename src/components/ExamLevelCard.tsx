@@ -71,21 +71,15 @@ export const ExamLevelCard = ({ level, title, description, fee, type = "full", n
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {/* Key Skills */}
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <CheckCircle className="h-4 w-4 text-purple-500 mr-2" />
-              <span className="text-sm font-medium">Key Skills Assessed:</span>
+          {/* Partial Exam Information for B1, B2, C1 */}
+          {(level === "B1" || level === "B2" || level === "C1") && (
+            <div className="text-center">
+              <div className="flex items-center justify-center">
+                <FileText className="h-4 w-4 text-blue-500 mr-2" />
+                <span className="text-sm font-medium text-blue-600">Partial exams available (written/oral)</span>
+              </div>
             </div>
-            <div className="ml-6 space-y-1">
-              {examDetails.skills.map((skill, index) => (
-                <div key={index} className="flex items-center text-sm text-gray-600">
-                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2"></div>
-                  {skill}
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
         </div>
       </CardContent>
     </Card>

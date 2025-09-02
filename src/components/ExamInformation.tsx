@@ -43,7 +43,7 @@ export const ExamInformation = ({ onBack }: ExamInformationProps) => {
     },
     {
       level: "C1",
-      title: "Advanced",
+      title: "University",
       description: "Wide range of demanding texts",
       duration: "4 hours", 
       skills: ["Complex texts", "Fluent expression", "Academic/professional use"],

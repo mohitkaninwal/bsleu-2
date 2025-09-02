@@ -65,7 +65,7 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
     { value: "B2", label: "B2 - Upper Intermediate", fee: 21240, description: "Complex texts, fluent interaction with native speakers", type: "full", note: "Including GST" },
     { value: "B1-P", label: "B1 Partial", fee: 20650, description: "Re-take only the failed module (Written OR Oral)", type: "partial", note: "Written/Oral only" },
     { value: "B2-P", label: "B2 Partial", fee: 20650, description: "Re-take only the failed module (Written OR Oral)", type: "partial", note: "Written/Oral only" },
-    { value: "C1", label: "C1 - Advanced", fee: 23600, description: "Demanding texts with implicit meaning, fluent spontaneous expression", type: "full", note: "Including GST" },
+    { value: "C1", label: "C1 - University", fee: 23600, description: "Demanding texts with implicit meaning, fluent spontaneous expression", type: "full", note: "Including GST" },
     { value: "C1-P", label: "C1 Partial", fee: 23010, description: "Re-take only the failed module (Written OR Oral)", type: "partial", note: "Written/Oral only" },
   ];
 
