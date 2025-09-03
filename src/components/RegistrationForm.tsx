@@ -381,22 +381,6 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div>
-          <Label htmlFor="familyName">Family Name *</Label>
-          <Input
-            id="familyName"
-            value={formData.familyName || ""}
-            onChange={(e) => handleFieldChange('familyName', e.target.value)}
-            placeholder="Enter your family name"
-            className={cn("mt-1", errors.familyName && "border-red-500")}
-          />
-          {errors.familyName && (
-            <div className="flex items-center text-red-500 text-sm mt-1">
-              <AlertCircle className="h-4 w-4 mr-1" />
-              {errors.familyName}
-            </div>
-          )}
-        </div>
-        <div>
           <Label htmlFor="firstName">First Name *</Label>
           <Input
             id="firstName"
@@ -409,6 +393,22 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
             <div className="flex items-center text-red-500 text-sm mt-1">
               <AlertCircle className="h-4 w-4 mr-1" />
               {errors.firstName}
+            </div>
+          )}
+        </div>
+        <div>
+          <Label htmlFor="familyName">Family Name *</Label>
+          <Input
+            id="familyName"
+            value={formData.familyName || ""}
+            onChange={(e) => handleFieldChange('familyName', e.target.value)}
+            placeholder="Enter your family name"
+            className={cn("mt-1", errors.familyName && "border-red-500")}
+          />
+          {errors.familyName && (
+            <div className="flex items-center text-red-500 text-sm mt-1">
+              <AlertCircle className="h-4 w-4 mr-1" />
+              {errors.familyName}
             </div>
           )}
         </div>
@@ -637,7 +637,7 @@ export const RegistrationForm = ({ onBack, onNext }: RegistrationFormProps) => {
       {/* Passport size photo upload placed just above Document Verification */}
       <div className="border-t pt-6">
         <h4 className="text-lg font-semibold mb-4">Passport Size Photo</h4>
-        <p className="text-sm text-gray-600 mb-2">Upload a recent passport size photograph (JPG/PNG). Optional but recommended.</p>
+        <p className="text-sm text-gray-600 mb-2">Upload a recent passport size photograph (JPG/PNG). Not older than 6 months.</p>
         <DocumentUpload
           onUpload={(file) => handleFieldChange('passportPhoto', file)}
           acceptedTypes=".jpg,.jpeg,.png"

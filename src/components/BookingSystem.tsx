@@ -5,8 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ArrowLeft, Calendar as CalendarIcon, Clock, CreditCard, FileText, Mic, Upload, AlertCircle, CheckCircle } from "lucide-react";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { BookingConfirmation } from "@/components/BookingConfirmation";
@@ -21,6 +23,7 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
   const [step, setStep] = useState(1);
   const [schedules, setSchedules] = useState<any[]>([]);
   const [isLoadingSchedules, setIsLoadingSchedules] = useState(false);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [testCenter] = useState("BSLEU Main Center, New Delhi");
   const [bookingReference, setBookingReference] = useState("");
   const [bookingId, setBookingId] = useState<number | null>(null);
@@ -59,14 +62,14 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
   } = bookingData;
 
   const examLevels = [
-    { value: "A1", label: "A1 - Beginner", fee: 20060, description: "Understanding familiar everyday expressions, basic personal communication", type: "full", note: "Including GST" },
-    { value: "A2", label: "A2 - Elementary", fee: 20060, description: "Sentences and frequently used expressions, simple routine tasks", type: "full", note: "Including GST" },
-    { value: "B1", label: "B1 - Intermediate", fee: 21240, description: "Main points on familiar matters, travel situations, experiences description", type: "full", note: "Including GST" },
-    { value: "B2", label: "B2 - Upper Intermediate", fee: 21240, description: "Complex texts, fluent interaction with native speakers", type: "full", note: "Including GST" },
-    { value: "B1-P", label: "B1 Partial", fee: 20650, description: "Re-take only the failed module (Written OR Oral)", type: "partial", note: "Written/Oral only" },
-    { value: "B2-P", label: "B2 Partial", fee: 20650, description: "Re-take only the failed module (Written OR Oral)", type: "partial", note: "Written/Oral only" },
-    { value: "C1", label: "C1 - University", fee: 23600, description: "Demanding texts with implicit meaning, fluent spontaneous expression", type: "full", note: "Including GST" },
-    { value: "C1-P", label: "C1 Partial", fee: 23010, description: "Re-take only the failed module (Written OR Oral)", type: "partial", note: "Written/Oral only" },
+    { value: "A1", label: "A1", fee: 20060, description: "Beginner", type: "full", note: "Including GST" },
+    { value: "A2", label: "A2", fee: 20060, description: "Elementary", type: "full", note: "Including GST" },
+    { value: "B1", label: "B1", fee: 21240, description: "Intermediate", type: "full", note: "Including GST" },
+    { value: "B2", label: "B2", fee: 21240, description: "Upper Intermediate", type: "full", note: "Including GST" },
+    { value: "B1-P", label: "B1-Partial", fee: 20650, description: "Written or Oral", type: "partial", note: "Written/Oral only" },
+    { value: "B2-P", label: "B2-Partial", fee: 20650, description: "Written or Oral", type: "partial", note: "Written/Oral only" },
+    { value: "C1", label: "C1", fee: 23600, description: "University", type: "full", note: "Including GST" },
+    { value: "C1-P", label: "C1-Partial", fee: 23010, description: "Written or Oral", type: "partial", note: "Written/Oral only" },
   ];
 
   const examTypes = [
@@ -250,11 +253,9 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
               onClick={() => updateField('selectedLevel', level.value)}
             >
               <CardContent className="p-4">
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-center">
                   <div>
-                    <Badge className="mb-2">{level.value}</Badge>
-                    <p className="font-medium">{level.label.split(" - ")[1]}</p>
-                    <p className="text-sm text-gray-600 mt-1">{level.description}</p>
+                    <Badge className="mb-2">{level.label}</Badge>
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-bold">₹{level.fee.toLocaleString()}</p>
@@ -354,13 +355,63 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
           <label className="text-sm font-medium text-gray-700 mb-3 block">
             Select Date *
           </label>
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={(date) => updateField('selectedDate', date)}
-            disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
-            className="rounded-md border pointer-events-auto"
-          />
+          <div className="space-y-2">
+            {/* Mobile-first approach: Show native date input on mobile, custom picker on desktop */}
+            <div className="block sm:hidden">
+              <input
+                type="date"
+                id="examDate-mobile"
+                value={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
+                onChange={(e) => {
+                  const dateValue = e.target.value ? new Date(e.target.value + 'T00:00:00') : undefined;
+                  updateField('selectedDate', dateValue);
+                }}
+                min={format(new Date(), 'yyyy-MM-dd')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Select exam date"
+              />
+            </div>
+            <div className="hidden sm:block">
+              <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal bg-white hover:bg-gray-50 border-2",
+                      !selectedDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? (
+                      format(selectedDate, "dd MMMM yyyy")
+                    ) : (
+                      <span>Select exam date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 bg-white shadow-lg border" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => {
+                      updateField('selectedDate', date);
+                      // Auto-close the popover after selection
+                      if (date) {
+                        setIsDatePickerOpen(false);
+                      }
+                    }}
+                    disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
+                    captionLayout="dropdown-buttons"
+                    fromYear={new Date().getFullYear()}
+                    toYear={new Date().getFullYear() + 2}
+                    defaultMonth={selectedDate || new Date()}
+                    showOutsideDays={false}
+                    fixedWeeks
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
         </div>
 
         {selectedDate && (
@@ -416,7 +467,7 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
         <CardContent className="space-y-4">
           <div className="flex justify-between">
             <span>Exam Level:</span>
-            <span className="font-medium">{selectedLevel} - {examLevels.find(l => l.value === selectedLevel)?.label.split(" - ")[1]}</span>
+            <span className="font-medium">{selectedLevel}</span>
           </div>
           <div className="flex justify-between">
             <span>Exam Type:</span>

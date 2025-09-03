@@ -1,7 +1,7 @@
 import { Op } from 'sequelize';
 import User from '../models/User.js';
 import { generateTokens } from '../middleware/auth.js';
-import { sendPasswordResetEmail, sendRegistrationConfirmation } from '../services/emailService.js';
+import { sendPasswordResetEmail } from '../services/emailService.js';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
 import logger from '../utils/logger.js';
@@ -56,17 +56,7 @@ export const registerUser = async (req, res) => {
 
     const { accessToken, refreshToken } = generateTokens(user.id);
 
-    // Send registration confirmation email
-    try {
-      await sendRegistrationConfirmation(user.email, {
-        firstName: user.firstName,
-        familyName: user.familyName,
-        email: user.email
-      });
-    } catch (emailError) {
-      logger.error('Failed to send registration email:', emailError);
-      // Don't fail registration if email fails
-    }
+
 
     res.status(201).json({ 
       success: true, 
