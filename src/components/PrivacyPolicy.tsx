@@ -4,9 +4,10 @@ import { ArrowLeft, Shield } from "lucide-react";
 
 interface PrivacyPolicyProps {
   onBack: () => void;
+  returnToPayment?: boolean;
 }
 
-export const PrivacyPolicy = ({ onBack }: PrivacyPolicyProps) => {
+export const PrivacyPolicy = ({ onBack, returnToPayment = false }: PrivacyPolicyProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Header */}
@@ -26,7 +27,7 @@ export const PrivacyPolicy = ({ onBack }: PrivacyPolicyProps) => {
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Home
+              {returnToPayment ? "Back to Payment" : "Back to Home"}
             </Button>
           </div>
         </div>

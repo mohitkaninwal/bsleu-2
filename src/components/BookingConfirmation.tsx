@@ -99,7 +99,7 @@ export const BookingConfirmation = ({
       <Card className="bg-gray-50">
         <CardHeader>
           <CardTitle className="text-center text-2xl font-bold text-blue-600">
-            {bookingReference}
+            {bookingReference || "Loading..."}
           </CardTitle>
           <p className="text-center text-sm text-gray-600">Booking Reference Number</p>
         </CardHeader>

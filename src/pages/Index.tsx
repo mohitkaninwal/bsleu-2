@@ -13,12 +13,28 @@ import { PrivacyPolicy } from "@/components/PrivacyPolicy";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<"home" | "register" | "book" | "exam-info" | "test-centers" | "terms" | "privacy">("home");
+  const [previousView, setPreviousView] = useState<"home" | "register" | "book" | "exam-info" | "test-centers" | "terms" | "privacy" | null>(null);
+  const [bookingStep, setBookingStep] = useState(1);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const examLevelsSectionRef = useRef<HTMLDivElement | null>(null);
 
   const handleViewExamsClick = () => {
     examLevelsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const navigateToView = (view: "home" | "register" | "book" | "exam-info" | "test-centers" | "terms" | "privacy") => {
+    setPreviousView(currentView);
+    setCurrentView(view);
+  };
+
+  const navigateBack = () => {
+    if (previousView) {
+      setCurrentView(previousView);
+      setPreviousView(null);
+    } else {
+      setCurrentView("home");
+    }
   };
 
   // Auto-slide functionality
@@ -53,7 +69,13 @@ const Index = () => {
   }
 
   if (currentView === "book") {
-    return <BookingSystem onBack={() => setCurrentView("register")} />;
+    return <BookingSystem 
+      onBack={() => setCurrentView("register")} 
+      onOpenTerms={() => navigateToView("terms")}
+      onOpenPrivacy={() => navigateToView("privacy")}
+      initialStep={bookingStep}
+      onStepChange={setBookingStep}
+    />;
   }
 
   // Admin panel is now a separate route at /admin; removed from user site
@@ -67,11 +89,17 @@ const Index = () => {
   }
 
   if (currentView === "terms") {
-    return <TermsAndConditions onBack={() => setCurrentView("home")} />;
+    return <TermsAndConditions 
+      onBack={navigateBack} 
+      returnToPayment={previousView === "book"}
+    />;
   }
 
   if (currentView === "privacy") {
-    return <PrivacyPolicy onBack={() => setCurrentView("home")} />;
+    return <PrivacyPolicy 
+      onBack={navigateBack} 
+      returnToPayment={previousView === "book"}
+    />;
   }
 
   return (

@@ -17,10 +17,14 @@ import { useFormPersistence } from "@/hooks/use-form-persistence";
 
 interface BookingSystemProps {
   onBack: () => void;
+  onOpenTerms?: () => void;
+  onOpenPrivacy?: () => void;
+  initialStep?: number;
+  onStepChange?: (step: number) => void;
 }
 
-export const BookingSystem = ({ onBack }: BookingSystemProps) => {
-  const [step, setStep] = useState(1);
+export const BookingSystem = ({ onBack, onOpenTerms, onOpenPrivacy, initialStep = 1, onStepChange }: BookingSystemProps) => {
+  const [step, setStep] = useState(initialStep);
   const [schedules, setSchedules] = useState<any[]>([]);
   const [isLoadingSchedules, setIsLoadingSchedules] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -28,6 +32,13 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
   const [bookingReference, setBookingReference] = useState("");
   const [bookingId, setBookingId] = useState<number | null>(null);
   const { toast } = useToast();
+
+  // Notify parent component when step changes
+  useEffect(() => {
+    if (onStepChange) {
+      onStepChange(step);
+    }
+  }, [step, onStepChange]);
 
   // Use form persistence for booking data
   const initialBookingData = {
@@ -165,7 +176,7 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
   };
 
   const generateBookingReference = () => {
-    const ref = `BSL${Date.now().toString().slice(-6)}${Math.random().toString(36).substr(2, 3).toUpperCase()}`;
+    const ref = `BSLEU-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
     setBookingReference(ref);
     return ref;
   };
@@ -230,6 +241,7 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
       return;
     }
     const ref = res.booking?.bookingReference || generateBookingReference();
+    setBookingReference(ref); // Ensure booking reference is set in state
     if (res.booking?.id) setBookingId(res.booking.id);
     toast({ title: 'Booking Created', description: `Reference: ${ref}` });
     setStep(4);
@@ -511,13 +523,21 @@ export const BookingSystem = ({ onBack }: BookingSystemProps) => {
             />
             <label htmlFor="terms" className="text-sm text-gray-700">
               I accept the{" "}
-              <a href="#" className="text-blue-600 hover:underline">
+              <button 
+                type="button"
+                onClick={onOpenTerms}
+                className="text-blue-600 hover:underline cursor-pointer"
+              >
                 Terms and Conditions
-              </a>{" "}
+              </button>{" "}
               and{" "}
-              <a href="#" className="text-blue-600 hover:underline">
+              <button 
+                type="button"
+                onClick={onOpenPrivacy}
+                className="text-blue-600 hover:underline cursor-pointer"
+              >
                 Privacy Policy
-              </a>
+              </button>
               . I understand that my booking will be held for 15 minutes during payment processing.
             </label>
           </div>

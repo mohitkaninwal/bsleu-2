@@ -4,9 +4,10 @@ import { ArrowLeft, FileText } from "lucide-react";
 
 interface TermsAndConditionsProps {
   onBack: () => void;
+  returnToPayment?: boolean;
 }
 
-export const TermsAndConditions = ({ onBack }: TermsAndConditionsProps) => {
+export const TermsAndConditions = ({ onBack, returnToPayment = false }: TermsAndConditionsProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Header */}
@@ -26,7 +27,7 @@ export const TermsAndConditions = ({ onBack }: TermsAndConditionsProps) => {
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Home
+              {returnToPayment ? "Back to Payment" : "Back to Home"}
             </Button>
           </div>
         </div>
