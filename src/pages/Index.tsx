@@ -8,9 +8,11 @@ import { RegistrationForm } from "@/components/RegistrationForm";
 import { BookingSystem } from "@/components/BookingSystem";
 import { ExamInformation } from "@/components/ExamInformation";
 import { TestCenters } from "@/components/TestCenters";
+import { TermsAndConditions } from "@/components/TermsAndConditions";
+import { PrivacyPolicy } from "@/components/PrivacyPolicy";
 
 const Index = () => {
-  const [currentView, setCurrentView] = useState<"home" | "register" | "book" | "exam-info" | "test-centers">("home");
+  const [currentView, setCurrentView] = useState<"home" | "register" | "book" | "exam-info" | "test-centers" | "terms" | "privacy">("home");
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const examLevelsSectionRef = useRef<HTMLDivElement | null>(null);
@@ -62,6 +64,14 @@ const Index = () => {
 
   if (currentView === "test-centers") {
     return <TestCenters onBack={() => setCurrentView("home")} />;
+  }
+
+  if (currentView === "terms") {
+    return <TermsAndConditions onBack={() => setCurrentView("home")} />;
+  }
+
+  if (currentView === "privacy") {
+    return <PrivacyPolicy onBack={() => setCurrentView("home")} />;
   }
 
   return (
@@ -164,7 +174,7 @@ const Index = () => {
                 View Exams
               </Button>
             </div>
-            <p className="text-xs text-gray-500 mt-4 text-center max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm text-gray-500 mt-4 text-center max-w-2xl mx-auto leading-relaxed">
               BSLEU Akademie LLP is a direct licenced testing center of telc gGmbH (license number 105007)
             </p>
           </div>
@@ -319,7 +329,7 @@ proficiency levels, from basic to advance. Select the level that matches your cu
 Full or Partial Exams.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
             {examLevels.map((exam) => (
               <ExamLevelCard key={exam.level} {...exam} />
             ))}
@@ -460,7 +470,7 @@ Full or Partial Exams.
              </div>
            </div>
            <div className="border-t border-gray-800 mt-8 sm:mt-12 pt-6 sm:pt-8 text-center text-gray-400">
-             <p className="text-xs sm:text-sm">&copy; 2025 BSLEU. All rights reserved. | Privacy Policy | Terms of Service</p>
+             <p className="text-xs sm:text-sm">&copy; 2025 BSLEU. All rights reserved. | <button onClick={() => setCurrentView("privacy")} className="underline hover:text-blue-400 transition-colors">Privacy Policy</button> | <button onClick={() => setCurrentView("terms")} className="underline hover:text-blue-400 transition-colors">Terms and Conditions</button></p>
            </div>
          </div>
        </footer>

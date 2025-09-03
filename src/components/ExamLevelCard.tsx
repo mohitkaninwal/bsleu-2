@@ -74,8 +74,7 @@ export const ExamLevelCard = ({ level, title, description, fee, type = "full", n
           {/* Partial Exam Information for B1, B2, C1 */}
           {(level === "B1" || level === "B2" || level === "C1") && (
             <div className="text-center">
-              <div className="flex items-center justify-center">
-                <FileText className="h-4 w-4 text-blue-500 mr-2" />
+              <div className="text-center">
                 <span className="text-sm font-medium text-blue-600">Partial exams available (written/oral)</span>
               </div>
             </div>
