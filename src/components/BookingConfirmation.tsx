@@ -52,8 +52,18 @@ export const BookingConfirmation = ({
 }: BookingConfirmationProps) => {
   const handleDownloadReceipt = async () => {
     try {
-      if (!bookingId) throw new Error('Missing booking id');
+      if (!bookingId) {
+        throw new Error('Missing booking id');
+      }
+      
+      // Try to download PDF from API
       const blob = await (await import("@/services/api")).bookingAPI.downloadReceipt(bookingId);
+      
+      // Verify it's a PDF blob
+      if (blob.type !== 'application/pdf') {
+        throw new Error('Invalid PDF response');
+      }
+      
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -62,26 +72,39 @@ export const BookingConfirmation = ({
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-    } catch (e) {
-      // fallback to local text receipt if endpoint not available with given identifier
-      const receiptData = {
-        reference: bookingReference,
-        level: examLevel,
-        type: examType,
-        center: testCenter,
-        date: examDate ? format(examDate, "PPP") : "TBD",
-        time: examTime,
-        amount: totalAmount,
-      };
-      const blob = generateReceiptBlob(receiptData);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${bookingReference}_receipt.txt`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      
+      // Show success message
+      console.log('PDF receipt downloaded successfully');
+      
+    } catch (error) {
+      console.error('Failed to download PDF receipt:', error);
+      
+      // Only fallback to text if PDF download completely fails
+      try {
+        const receiptData = {
+          reference: bookingReference,
+          level: examLevel,
+          type: examType,
+          center: testCenter,
+          date: examDate ? format(examDate, "PPP") : "TBD",
+          time: examTime,
+          amount: totalAmount,
+        };
+        const blob = generateReceiptBlob(receiptData);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${bookingReference}_receipt.txt`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        
+        console.log('Text receipt downloaded as fallback');
+      } catch (fallbackError) {
+        console.error('Failed to generate fallback receipt:', fallbackError);
+        alert('Failed to download receipt. Please try again later.');
+      }
     }
   };
 

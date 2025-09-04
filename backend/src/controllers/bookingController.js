@@ -163,37 +163,92 @@ export const downloadReceipt = async (req, res) => {
     if (!booking) {
       return res.status(404).json({ success: false, message: 'Booking not found' });
     }
+    
     const schedule = await Schedule.findByPk(booking.scheduleId);
     const user = await User.findByPk(userId);
 
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
     const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([595.28, 841.89]);
+    const page = pdfDoc.addPage([595.28, 841.89]); // A4 size
     const { width, height } = page.getSize();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const title = 'BSLEU Booking Receipt';
-    page.drawText(title, { x: 50, y: height - 80, size: 20, font, color: rgb(0.14, 0.39, 0.92) });
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    
+    // Header
+    const title = 'BSLEU Akademie - Payment Receipt';
+    page.drawText(title, { x: 50, y: height - 80, size: 20, font: boldFont, color: rgb(0.14, 0.39, 0.92) });
+    
+    // Company info
+    page.drawText('BSLEU Akademie LLP', { x: 50, y: height - 110, size: 14, font: boldFont, color: rgb(0, 0, 0) });
+    page.drawText('Direct Licensed Testing Center of telc gGmbH', { x: 50, y: height - 130, size: 10, font, color: rgb(0.3, 0.3, 0.3) });
+    page.drawText('License Number: 105007', { x: 50, y: height - 145, size: 10, font, color: rgb(0.3, 0.3, 0.3) });
+    
+    // Receipt details
+    const examDate = schedule?.examDate ? new Date(schedule.examDate).toLocaleDateString('en-IN', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    }) : 'To be announced';
+    
+    const examTime = schedule?.examTime ? 
+      (schedule.examTime === 'morning' ? 'Morning (08:30 AM)' : 'Evening (12:00 PM)') : 
+      'To be announced';
+    
+    const testCenter = schedule?.testCenter || 'BSLEU Main Center, Noida';
+    
     const lines = [
-      `Name: ${user.firstName} ${user.familyName}`,
-      `Email: ${user.email}`,
+      '',
+      'PAYMENT DETAILS:',
       `Booking Reference: ${booking.bookingReference}`,
+      `Transaction Date: ${new Date(booking.createdAt).toLocaleDateString('en-IN')}`,
+      `Amount Paid: ₹${Number(booking.examFee).toLocaleString()}`,
+      `Payment Status: ${booking.paymentStatus.toUpperCase()}`,
+      '',
+      'EXAM DETAILS:',
+      `Candidate Name: ${user.firstName} ${user.familyName}`,
+      `Email: ${user.email}`,
       `Exam Level: ${booking.examLevel}`,
-      `Exam Type: ${booking.examType}${booking.partialComponent ? ' ('+booking.partialComponent+')' : ''}`,
-      `Exam Date: ${schedule?.examDate || 'TBD'}`,
-      `Exam Time: ${schedule?.examTime || 'TBD'}`,
-      `Test Center: ${schedule?.testCenter || 'TBD'}`,
-      `Amount: ₹${Number(booking.examFee).toLocaleString()}`,
-      `Status: ${booking.status}`,
-      `Generated: ${new Date().toLocaleString()}`,
+      `Exam Type: ${booking.examType}${booking.partialComponent ? ' (' + booking.partialComponent + ')' : ''}`,
+      `Exam Date: ${examDate}`,
+      `Exam Time: ${examTime}`,
+      `Test Center: ${testCenter}`,
+      '',
+      'IMPORTANT NOTES:',
+      '• Please arrive 30 minutes before the exam time',
+      '• Bring a valid passport for identification',
+      '• No electronic devices are allowed in the exam hall',
+      '• Contact us for any queries at info@bsleu.com',
+      '',
+      `Receipt Generated: ${new Date().toLocaleString('en-IN')}`,
     ];
-    let y = height - 120;
+    
+    let y = height - 180;
     lines.forEach((text) => {
-      page.drawText(text, { x: 50, y, size: 12, font, color: rgb(0, 0, 0) });
-      y -= 20;
+      if (text === '') {
+        y -= 10; // Extra space for empty lines
+      } else if (text.includes(':')) {
+        // Section headers
+        page.drawText(text, { x: 50, y, size: 12, font: boldFont, color: rgb(0, 0, 0) });
+        y -= 20;
+      } else if (text.startsWith('•')) {
+        // Bullet points
+        page.drawText(text, { x: 70, y, size: 10, font, color: rgb(0, 0, 0) });
+        y -= 15;
+      } else {
+        // Regular text
+        page.drawText(text, { x: 50, y, size: 11, font, color: rgb(0, 0, 0) });
+        y -= 18;
+      }
     });
+    
     const pdfBytes = await pdfDoc.save();
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${booking.bookingReference}_receipt.pdf"`);
+    res.setHeader('Cache-Control', 'no-cache');
     return res.status(200).send(Buffer.from(pdfBytes));
   } catch (error) {
     logger.error('Download Receipt Error:', error);
