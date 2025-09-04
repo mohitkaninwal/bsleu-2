@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Users, Calendar } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScheduleManager } from "@/components/ScheduleManager";
+import { UserDetailsModal } from "@/components/UserDetailsModal";
 import { adminAPI, authAPI, isAuthenticated } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -31,6 +32,9 @@ export const AdminDashboard = ({ onBack }: AdminDashboardProps) => {
   });
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   const formatUserId = (id: string | number): string => {
@@ -132,6 +136,38 @@ export const AdminDashboard = ({ onBack }: AdminDashboardProps) => {
         return "bg-gray-100 text-gray-800";
       default:
         return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const handleUserHover = (userId: string) => {
+    // Clear any existing timeout
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+    }
+    
+    // Set a delay before opening the modal
+    const timeout = setTimeout(() => {
+      setSelectedUserId(userId);
+      setIsUserModalOpen(true);
+    }, 800); // 800ms delay
+    
+    setHoverTimeout(timeout);
+  };
+
+  const handleUserLeave = () => {
+    // Clear the timeout when user stops hovering
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+      setHoverTimeout(null);
+    }
+  };
+
+  const handleCloseUserModal = () => {
+    setIsUserModalOpen(false);
+    setSelectedUserId(null);
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+      setHoverTimeout(null);
     }
   };
 
@@ -259,6 +295,7 @@ export const AdminDashboard = ({ onBack }: AdminDashboardProps) => {
                         (booking.examLevel || '').toLowerCase().includes(searchTerm.toLowerCase())
                       )
                        .filter(booking => bookingStatusFilter === 'all' || (booking.status || '').toLowerCase() === bookingStatusFilter)
+                       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                       .map((booking) => (
                       <TableRow key={booking.id}>
                         <TableCell className="font-medium text-xs sm:text-sm">
@@ -268,9 +305,21 @@ export const AdminDashboard = ({ onBack }: AdminDashboardProps) => {
                         </TableCell>
                         <TableCell>
                           <div className="min-w-0">
-                            <p className="font-medium text-xs sm:text-sm truncate">
-                              {`${booking.User?.firstName || ''} ${booking.User?.familyName || ''}`.trim()}
-                            </p>
+                            <div
+                              onMouseEnter={() => booking.User?.id && handleUserHover(booking.User.id)}
+                              onMouseLeave={handleUserLeave}
+                              className="relative group/hover"
+                            >
+                              <span className="font-medium text-xs sm:text-sm truncate text-left hover:text-blue-600 transition-all duration-300 cursor-pointer inline-block relative group">
+                                {`${booking.User?.firstName || ''} ${booking.User?.familyName || ''}`.trim()}
+                                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 group-hover:w-full transition-all duration-300"></span>
+                              </span>
+                              
+                              {/* Hover tooltip */}
+                              <div className="absolute top-full left-0 mt-1 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 group-hover/hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                Hover to view details
+                              </div>
+                            </div>
                             <p className="text-xs text-gray-600 truncate hidden sm:block">
                               {booking.User?.email}
                             </p>
@@ -415,6 +464,15 @@ export const AdminDashboard = ({ onBack }: AdminDashboardProps) => {
           </Tabs>
         )}
       </div>
+      
+      {/* User Details Modal */}
+      {selectedUserId && (
+        <UserDetailsModal
+          isOpen={isUserModalOpen}
+          onClose={handleCloseUserModal}
+          userId={selectedUserId}
+        />
+      )}
     </div>
   );
 };

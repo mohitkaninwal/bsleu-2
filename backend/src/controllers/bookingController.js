@@ -156,10 +156,22 @@ export const cancelBooking = async (req, res) => {
 // @desc    Download booking receipt as PDF
 export const downloadReceipt = async (req, res) => {
   try {
-    const bookingId = req.params.id;
+    const identifier = req.params.id;
     const userId = req.user.id;
 
-    const booking = await Booking.findOne({ where: { id: bookingId, userId } });
+    // Try to find booking by ID first, then by booking reference
+    let booking = null;
+    
+    // Check if identifier is numeric (booking ID)
+    if (/^\d+$/.test(identifier)) {
+      booking = await Booking.findOne({ where: { id: parseInt(identifier), userId } });
+    }
+    
+    // If not found by ID or identifier is not numeric, try booking reference
+    if (!booking) {
+      booking = await Booking.findOne({ where: { bookingReference: identifier, userId } });
+    }
+    
     if (!booking) {
       return res.status(404).json({ success: false, message: 'Booking not found' });
     }

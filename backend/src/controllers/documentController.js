@@ -1,4 +1,7 @@
 import Document from '../models/Document.js';
+import User from '../models/User.js';
+import fs from 'fs';
+import path from 'path';
 import logger from '../utils/logger.js';
 
 // @desc    Upload a document
@@ -80,8 +83,54 @@ export const uploadDocument = async (req, res) => {
 
 // @desc    Get/download a document
 export const getDocument = async (req, res) => {
-    // Placeholder function
-    res.status(501).json({ message: 'Not Implemented' });
+    try {
+        const documentId = req.params.id;
+        const userId = req.user.id;
+        const userRole = req.user.role;
+        
+        const document = await Document.findByPk(documentId, {
+            include: [
+                {
+                    model: User,
+                    attributes: ['id', 'firstName', 'familyName']
+                }
+            ]
+        });
+        
+        if (!document) {
+            return res.status(404).json({ success: false, message: 'Document not found' });
+        }
+        
+        // Check permissions: user can access their own documents, admin can access all
+        if (userRole !== 'admin' && document.userId !== userId) {
+            return res.status(403).json({ success: false, message: 'Access denied' });
+        }
+        
+        // Check if file exists
+        const filePath = path.resolve(document.filePath);
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ success: false, message: 'File not found on server' });
+        }
+        
+        // Update download count and timestamp
+        await document.update({
+            downloadCount: document.downloadCount + 1,
+            lastDownloadedAt: new Date()
+        });
+        
+        // Set appropriate headers for download
+        res.setHeader('Content-Type', document.mimeType);
+        res.setHeader('Content-Disposition', `attachment; filename="${document.originalName}"`);
+        res.setHeader('Cache-Control', 'no-cache');
+        
+        // Stream the file
+        const fileStream = fs.createReadStream(filePath);
+        fileStream.pipe(res);
+        
+    } catch (error) {
+        logger.error('Document Download Error:', error);
+        res.status(500).json({ success: false, message: 'Server error during document download' });
+    }
 };
 
 // @desc    Delete a document

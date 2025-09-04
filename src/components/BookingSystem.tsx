@@ -245,9 +245,14 @@ export const BookingSystem = ({ onBack, onOpenTerms, onOpenPrivacy, initialStep 
       toast({ title: 'Booking failed', description: res.message || 'Unable to create booking.', variant: 'destructive' });
       return;
     }
+    
     const ref = res.booking?.bookingReference || generateBookingReference();
     setBookingReference(ref); // Ensure booking reference is set in state
-    if (res.booking?.id) setBookingId(res.booking.id);
+    
+    if (res.booking?.id) {
+      setBookingId(res.booking.id);
+    }
+    
     toast({ title: 'Booking Created', description: `Reference: ${ref}` });
     setStep(4);
   };
@@ -439,7 +444,10 @@ export const BookingSystem = ({ onBack, onOpenTerms, onOpenPrivacy, initialStep 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
               {isLoadingSchedules && <span className="text-sm text-gray-500">Loading schedules...</span>}
               {!isLoadingSchedules && availableTimeSlots.length === 0 && (
-                <span className="text-sm text-gray-500">No schedules available for this date.</span>
+                <div className="col-span-full text-center">
+                  <p className="text-sm text-gray-500">No slots available for this date.</p>
+                  <p className="text-xs text-gray-400 mt-1">Please select a different date.</p>
+                </div>
               )}
               {!isLoadingSchedules && availableTimeSlots.map((slot) => (
                 <Button
@@ -680,7 +688,7 @@ export const BookingSystem = ({ onBack, onOpenTerms, onOpenPrivacy, initialStep 
                       className="ml-auto order-1 sm:order-2"
                       disabled={
                         (step === 1 && !canProceedStep1()) ||
-                        (step === 2 && (!selectedDate || !selectedTime || !selectedScheduleId))
+                        (step === 2 && (!selectedDate || !selectedTime || !selectedScheduleId || availableTimeSlots.length === 0))
                       }
                     >
                       <span className="hidden sm:inline">Next</span>

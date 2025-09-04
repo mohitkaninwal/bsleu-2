@@ -69,7 +69,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
 
       // Razorpay payment options
       const options = {
-        key: process.env.REACT_APP_RAZORPAY_KEY_ID || 'rzp_test_your_key_id', // Replace with your Razorpay key
+        key: process.env.REACT_APP_RAZORPAY_KEY_ID || '', // Razorpay key from environment
         amount: order.amount,
         currency: order.currency,
         name: 'BSLEU Exam Booking',

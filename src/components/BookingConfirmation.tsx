@@ -52,12 +52,15 @@ export const BookingConfirmation = ({
 }: BookingConfirmationProps) => {
   const handleDownloadReceipt = async () => {
     try {
-      if (!bookingId) {
-        throw new Error('Missing booking id');
+      // Use booking ID if available, otherwise use booking reference
+      const identifier = bookingId || bookingReference;
+      
+      if (!identifier) {
+        throw new Error('Missing booking identifier');
       }
       
       // Try to download PDF from API
-      const blob = await (await import("@/services/api")).bookingAPI.downloadReceipt(bookingId);
+      const blob = await (await import("@/services/api")).bookingAPI.downloadReceipt(identifier);
       
       // Verify it's a PDF blob
       if (blob.type !== 'application/pdf') {
@@ -72,9 +75,6 @@ export const BookingConfirmation = ({
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      
-      // Show success message
-      console.log('PDF receipt downloaded successfully');
       
     } catch (error) {
       console.error('Failed to download PDF receipt:', error);
@@ -100,7 +100,6 @@ export const BookingConfirmation = ({
         a.remove();
         URL.revokeObjectURL(url);
         
-        console.log('Text receipt downloaded as fallback');
       } catch (fallbackError) {
         console.error('Failed to generate fallback receipt:', fallbackError);
         alert('Failed to download receipt. Please try again later.');
@@ -187,7 +186,6 @@ export const BookingConfirmation = ({
             <h4 className="font-medium text-blue-900">What's Next?</h4>
             <ul className="text-sm text-blue-800 mt-2 space-y-1">
               <li>• A confirmation email has been sent to your registered email address</li>
-              <li>• You will receive a reminder email 1 week and 1 day before your exam</li>
               <li>• Please arrive at the test center 30 minutes before your scheduled time</li>
               <li>• Bring a valid photo ID that matches your registration details</li>
             </ul>

@@ -195,15 +195,28 @@ export const bookingAPI = {
     return handleResponse(response);
   },
 
-  downloadReceipt: async (bookingId: number): Promise<Blob> => {
+  downloadReceipt: async (identifier: number | string): Promise<Blob> => {
     const token = localStorage.getItem('accessToken');
-    const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}/receipt`, {
+    const response = await fetch(`${API_BASE_URL}/bookings/${identifier}/receipt`, {
       headers: {
         ...(token && { Authorization: `Bearer ${token}` }),
       },
     });
     if (!response.ok) {
       throw new Error('Failed to download receipt');
+    }
+    return await response.blob();
+  },
+
+  downloadDocument: async (documentId: number): Promise<Blob> => {
+    const token = localStorage.getItem('accessToken');
+    const response = await fetch(`${API_BASE_URL}/documents/${documentId}`, {
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+    if (!response.ok) {
+      throw new Error('Failed to download document');
     }
     return await response.blob();
   },
@@ -362,6 +375,29 @@ export const adminAPI = {
     
     return handleResponse(response);
   },
+
+  getUserDetails: async (userId: string): Promise<ApiResponse> => {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+      headers: getAuthHeaders(),
+    });
+    
+    return handleResponse(response);
+  },
+
+  exportUserDetailsPDF: async (userId: string): Promise<Blob> => {
+    const token = localStorage.getItem('accessToken');
+    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/export-pdf`, {
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to export user details PDF');
+    }
+    
+    return await response.blob();
+  }
 };
 
 // Utility function to check if user is authenticated
