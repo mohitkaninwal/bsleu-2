@@ -176,7 +176,12 @@ export const BookingSystem = ({ onBack, onOpenTerms, onOpenPrivacy, initialStep 
   };
 
   const generateBookingReference = () => {
-    const ref = `BSLEU-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    const now = new Date();
+    const year = now.getFullYear().toString().slice(-2);
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const randomCode = Math.random().toString(36).substr(2, 4).toUpperCase();
+    const ref = `BSLEU-${year}${month}${day}-${randomCode}`;
     setBookingReference(ref);
     return ref;
   };

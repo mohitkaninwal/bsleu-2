@@ -29,7 +29,7 @@ DB_PORT=5432
 RAZORPAY_KEY_ID=your_razorpay_key
 RAZORPAY_KEY_SECRET=your_razorpay_secret
 FRONTEND_URL=https://your-vercel-app.vercel.app
-EXAM_CENTER=BSLEU Main Center, New Delhi
+EXAM_CENTER=BSLEU Main Center, Noida
 ```
 
 ### 2. **After Environment Variables are Set**

@@ -35,7 +35,7 @@ export const ScheduleManager = ({ onScheduleUpdate }: ScheduleManagerProps) => {
     examLevel: "",
     date: undefined as Date | undefined,
     timeSlots: [] as Array<'morning'|'evening'>,
-    testCenter: "BSLEU Main Center, New Delhi",
+    testCenter: "BSLEU Main Center, Noida",
     maxCapacity: 20,
     examType: 'full' as 'full' | 'partial',
   });
@@ -81,7 +81,7 @@ export const ScheduleManager = ({ onScheduleUpdate }: ScheduleManagerProps) => {
       examLevel: "",
       date: undefined,
       timeSlots: [],
-      testCenter: "BSLEU Main Center, New Delhi",
+      testCenter: "BSLEU Main Center, Noida",
       maxCapacity: 20,
       examType: 'full',
     });

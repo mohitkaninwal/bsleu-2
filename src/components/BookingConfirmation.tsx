@@ -103,45 +103,45 @@ export const BookingConfirmation = ({
           </CardTitle>
           <p className="text-center text-sm text-gray-600">Booking Reference Number</p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <Calendar className="h-5 w-5 text-blue-600" />
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex items-start space-x-2">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Calendar className="h-6 w-6 text-blue-600" />
               </div>
-              <div>
-                <p className="text-sm text-gray-600">Exam Level</p>
-                <p className="font-medium">{examLevel}</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Exam Type</p>
-                <p className="font-medium">{examType}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-gray-600 mb-1">Exam Level</p>
+                <p className="font-semibold text-gray-900 text-lg">{examLevel}</p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                <MapPin className="h-5 w-5 text-purple-600" />
+            <div className="flex items-start space-x-2">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="h-6 w-6 text-green-600" />
               </div>
-              <div>
-                <p className="text-sm text-gray-600">Test Center</p>
-                <p className="font-medium">BSLEU Main Center, New Delhi</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-gray-600 mb-1">Exam Type</p>
+                <p className="font-semibold text-gray-900 text-lg">{examType}</p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                <Clock className="h-5 w-5 text-orange-600" />
+            <div className="flex items-start space-x-2">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <MapPin className="h-6 w-6 text-purple-600" />
               </div>
-              <div>
-                <p className="text-sm text-gray-600">Date & Time</p>
-                <p className="font-medium">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-gray-600 mb-1">Test Center</p>
+                <p className="font-semibold text-gray-900 text-lg">BSLEU Main Center, Noida</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start space-x-2">
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Clock className="h-6 w-6 text-orange-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-gray-600 mb-1">Date & Time</p>
+                <p className="font-semibold text-gray-900 text-lg">
                   {examDate ? format(examDate, "MMM dd, yyyy") : "TBD"} ({examTime === 'morning' ? 'Morning' : 'Evening'})
                 </p>
               </div>

@@ -2,6 +2,7 @@ import Booking from '../models/Booking.js';
 import Schedule from '../models/Schedule.js';
 import User from '../models/User.js';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { generateBookingReference } from '../utils/bookingReference.js';
 import logger from '../utils/logger.js';
 
 // @desc    Create a new booking
@@ -39,7 +40,7 @@ export const createBooking = async (req, res) => {
         }
 
         // Generate unique booking reference
-        const bookingReference = `BSLEU-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+        const bookingReference = generateBookingReference();
 
         // Prevent duplicate booking by the same user for the same schedule (date + shift)
         const existing = await Booking.findOne({ where: { userId, scheduleId } });

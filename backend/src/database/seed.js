@@ -5,9 +5,10 @@ import db from '../models/index.js';
 import User from '../models/User.js';
 import Schedule from '../models/Schedule.js';
 import Booking from '../models/Booking.js';
+import { generateSeedBookingReference } from '../utils/bookingReference.js';
 import logger from '../utils/logger.js';
 
-const MAIN_CENTER = process.env.EXAM_CENTER || 'BSLEU Main Center, New Delhi';
+const MAIN_CENTER = process.env.EXAM_CENTER || 'BSLEU Main Center, Noida';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@bsleu.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'password1234';
 
@@ -113,7 +114,7 @@ async function run() {
 
     // Create bookings
     const [bk1] = await Booking.findOrCreate({
-      where: { bookingReference: 'BSLEU-SEED-1' },
+      where: { bookingReference: generateSeedBookingReference(1) },
       defaults: {
         userId: user1.id,
         scheduleId: sch1.id,
@@ -127,7 +128,7 @@ async function run() {
     });
 
     const [bk2] = await Booking.findOrCreate({
-      where: { bookingReference: 'BSLEU-SEED-2' },
+      where: { bookingReference: generateSeedBookingReference(2) },
       defaults: {
         userId: user2.id,
         scheduleId: sch3.id,
