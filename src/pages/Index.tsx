@@ -478,11 +478,11 @@ Full or Partial Exams.
              <div className="text-center lg:text-left">
                <div className="flex items-center justify-center lg:justify-start space-x-2 mb-4 sm:mb-6">
                  <BookOpen className="h-5 w-5 sm:h-6 sm:w-6" />
-                 <img
-                   src="/logo.png"
-                   alt="BSL Akademie"
-                   className="h-8 sm:h-10 lg:h-12 w-auto"
-                 />
+                                 <img
+                  src="/image.png"
+                  alt="BSLEU Akademie"
+                  className="h-12 sm:h-16 lg:h-20 w-auto"
+                />
                </div>
                <p className="text-gray-400 text-sm sm:text-base leading-relaxed max-w-md mx-auto lg:mx-0">
                telc Language Certification platform trusted by thousands of students worldwide.

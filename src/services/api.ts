@@ -384,20 +384,6 @@ export const adminAPI = {
     return handleResponse(response);
   },
 
-  exportUserDetailsPDF: async (userId: string): Promise<Blob> => {
-    const token = localStorage.getItem('accessToken');
-    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/export-pdf`, {
-      headers: {
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to export user details PDF');
-    }
-    
-    return await response.blob();
-  }
 };
 
 // Utility function to check if user is authenticated

@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticateToken, requireAdmin } from '../middleware/auth.js';
-import { getDashboardStats, getAllUsers, getAllBookings, getUserDetails, exportUserDetailsPDF } from '../controllers/adminController.js';
+import { getDashboardStats, getAllUsers, getAllBookings, getUserDetails } from '../controllers/adminController.js';
 
 const router = express.Router();
 
@@ -27,6 +27,5 @@ router.get('/bookings', getAllBookings);
 // @desc    Get user details with documents
 // @access  Admin
 router.get('/users/:userId', getUserDetails);
-router.get('/users/:userId/export-pdf', exportUserDetailsPDF);
 
 export default router;

@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, FileText, Image, Calendar, MapPin, Phone, Mail, User, CreditCard, FileDown } from 'lucide-react';
+import { Download, FileText, Image, Calendar, MapPin, Phone, Mail, User, CreditCard } from 'lucide-react';
 import { adminAPI, bookingAPI } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -114,33 +114,6 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     }
   };
 
-  const handleExportPDF = async () => {
-    if (!userId) return;
-    
-    try {
-      const blob = await adminAPI.exportUserDetailsPDF(userId);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `user-details-${userData?.firstName || 'unknown'}-${userData?.familyName || 'user'}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      
-      toast({
-        title: "Export Successful",
-        description: "User details exported as PDF successfully."
-      });
-    } catch (error) {
-      console.error('Export PDF error:', error);
-      toast({
-        title: "Export Failed",
-        description: "Failed to export user details as PDF. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
 
   const getDocumentTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
@@ -227,14 +200,6 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
               <div className="h-1 w-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
             </div>
             
-            {/* Export PDF Button */}
-            <Button
-              onClick={handleExportPDF}
-              className="ml-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
-            >
-              <FileDown className="h-4 w-4" />
-              Export PDF
-            </Button>
           </div>
         </DialogHeader>
 
